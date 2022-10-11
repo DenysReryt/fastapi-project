@@ -1,0 +1,8 @@
+version: '3.10'
+services:
+  app:
+    build: .
+    container_name: fastapi-project
+    command: uvicorn app.main:app
+    ports:
+      - "8000:8000"
