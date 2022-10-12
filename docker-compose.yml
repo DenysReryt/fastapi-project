@@ -1,8 +1,9 @@
-version: '3.10'
+version: '3'
+
 services:
-  app:
+  api:
     build: .
-    container_name: fastapi-project
-    command: uvicorn app.main:app
+    image: myimage
+    command: uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
