@@ -1,6 +1,6 @@
 # Run
 ```
-docker-compose up
+docker-compose up -d
 ```
 # Check
 http://localhost:8000/
