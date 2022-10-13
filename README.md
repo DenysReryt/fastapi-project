@@ -1,10 +1,7 @@
-# Install 
-___
-```commandline
-pip install -r requirements.txt
+
+# Run
 ```
-___
-## Run
-```commandline
-py server.py
+docker-compose up -d
 ```
+# Check
+http://localhost:8000/
