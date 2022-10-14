@@ -1,14 +1,10 @@
-# Postgres
-import os
-
 from databases import Database
-from sqlalchemy import create_engine, MetaData
-
-DATABASE_URL = os.getenv("DATABASE_URL", 'sqlite://')
+from sqlalchemy import create_engine, MetaData, Column, DateTime, Integer, String, Table
+from config import POSTGRES_URL
 
 # SQLAlchemy
-engine = create_engine(DATABASE_URL)
+engine = create_engine(POSTGRES_URL)
 metadata = MetaData()
 
 # конструктор запитів бази даних
-database = Database(DATABASE_URL)
+database = Database(POSTGRES_URL)
