@@ -1,12 +1,10 @@
-import databases
-import aioredis
+# import aioredis
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from config import REDIS_URL, POSTGRES_URL
-
-postgres_db = databases.Database(POSTGRES_URL)
+#
+# from config import REDIS_URL
+# from db import database
 
 app = FastAPI()
 
@@ -29,13 +27,13 @@ def home():
     return {'status': 'Working'}
 
 
-@app.on_event('startup')
-async def startup():
-    await postgres_db.connect()
-    app.state.redis = await aioredis.from_url(REDIS_URL)
-
-
-@app.on_event('shutdown')
-async def shutdown():
-    await postgres_db.disconnect()
-    await app.state.redis.close()
+# @app.on_event('startup')
+# async def startup():
+#     await database.connect()
+#     app.state.redis = await aioredis.from_url(REDIS_URL)
+#
+#
+# @app.on_event('shutdown')
+# async def shutdown():
+#     await database.disconnect()
+#     await app.state.redis.close()
