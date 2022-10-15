@@ -5,3 +5,7 @@ databases
 SQLAlchemy
 psycopg2-binary
 aioredis
+fastapi-sqlalchemy
+pydantic
+alembic
+
