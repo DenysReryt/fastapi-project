@@ -27,6 +27,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def make_logger(rotation_size, level):
+    logger.remove()
+    pid = os.getpid()
+    dt = datetime.datetime.now()
+    logger.add(
+        f'data/logs/fastapi-{dt}-{pid}.log',
+        rotation=rotation_size,
+        enqueue=True,
+        backtrace=True,
+        level=level,
+        format="{time} %s {level} {message}" % pid,
+    )
+    return logger.bind()
 
 @app.get('/')
 def status():
@@ -47,7 +60,7 @@ async def user(user: SchemaUser):
 
 @app.get('/user/')
 async def user():
-    user = db.session.query(ModelUser).all()
+    user = db.session.query(SchemaUser).all()
     return user
 
 
