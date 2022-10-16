@@ -79,3 +79,4 @@ async def user():
 # to run locally
 if __name__ == '__main__':
     uvicorn.run("main:app", reload=True)
+
