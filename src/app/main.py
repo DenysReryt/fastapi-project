@@ -10,6 +10,9 @@ from fastapi_sqlalchemy import DBSessionMiddleware, db
 from app.schema import User as SchemaUser
 from app.model import User as ModelUser
 
+from app.custom_logging import logging_config
+
+
 app = FastAPI()
 
 app.add_middleware(DBSessionMiddleware, db_url=DATABASE_URL)
@@ -27,36 +30,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def make_logger(rotation_size, level):
-    logger.remove()
-    pid = os.getpid()
-    dt = datetime.datetime.now()
-    logger.add(
-        f'data/logs/fastapi-{dt}-{pid}.log',
-        rotation=rotation_size,
-        enqueue=True,
-        backtrace=True,
-        level=level,
-        format="{time} %s {level} {message}" % pid,
-    )
-    return logger.bind()
 
 @app.get('/')
 def status():
     return {"status": "Working"}
 
+
 @app.post('/user/', response_model=SchemaUser)
 async def user(user: SchemaUser):
     db_user = ModelUser(
-        first_name = user.first_name,
-        last_name = user.last_name,
-        position = user.position,
-        email = user.email)
+        first_name=user.first_name,
+        last_name=user.last_name,
+        position=user.position,
+        email=user.email)
 
     db.session.add(db_user)
     db.session.commit()
 
     return db_user
+
 
 @app.get('/user/')
 async def user():
@@ -78,4 +70,4 @@ async def user():
 
 # to run locally
 if __name__ == '__main__':
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("main:app", reload=True, log_config=logging_config)

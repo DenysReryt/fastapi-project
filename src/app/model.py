@@ -1,11 +1,6 @@
-from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String, create_engine)
+from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String)
 from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
-from app.config import DATABASE_URL
-
-engine = create_engine(DATABASE_URL)
-Base = declarative_base()
-
+from app.db import Base, engine
 
 class User(Base):
     __tablename__ = 'User'
