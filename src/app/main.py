@@ -1,5 +1,5 @@
 import aioredis
-from app.config import REDIS_URL, DATABASE_URL
+from src.app.config import REDIS_URL, DATABASE_URL
 
 from fastapi import FastAPI
 import uvicorn
@@ -7,10 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 
-from app.schema import User as SchemaUser
-from app.model import User as ModelUser
+from src.app.schema import User as SchemaUser
+from src.app.model import User as ModelUser
 
-from app.custom_logging import logging_config
+# from src.app.custom_logging import logging_config
 
 
 app = FastAPI()
