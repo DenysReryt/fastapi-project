@@ -29,7 +29,7 @@ services:
     image: postgres
     restart: always
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - /var/lib/postgresql/data
     env_file:
       - .env
     environment:
