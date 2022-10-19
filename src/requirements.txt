@@ -9,3 +9,4 @@ fastapi-sqlalchemy
 pydantic
 alembic
 loguru
+python-dotenv

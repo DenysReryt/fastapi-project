@@ -1,6 +1,6 @@
 from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String)
 from sqlalchemy.sql import func
-from src.app.db import Base, engine
+from src.app.db import Base
 
 class User(Base):
     __tablename__ = 'User'
@@ -12,4 +12,3 @@ class User(Base):
     password = Column(String(50))
     date_created = Column(DateTime, server_default=func.now())
     date_updated = Column(DateTime, onupdate=func.now())
-    employee_id = Column(Integer, ForeignKey('employee.id'))

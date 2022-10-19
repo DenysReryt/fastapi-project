@@ -39,6 +39,15 @@ services:
     ports:
       - 5432:5432
 
+  pgweb:
+    image: sosedoff/pgweb
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db/postgres?sslmode=disable
+    depends_on:
+      - db
+
 volumes:
   postgres_data:
   redis_data:
