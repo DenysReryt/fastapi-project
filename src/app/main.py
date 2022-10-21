@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.app.config import settings
-from src.app.routers import crud_user
+from src.app.routers import routers
 import uvicorn
 
 app = FastAPI()
@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-app.include_router(crud_user.router, tags=['Users'], prefix='/users')
+app.include_router(routers.router, tags=['Users'], prefix='/users')
 
 
 @app.get('/')
