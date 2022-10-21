@@ -9,6 +9,7 @@ class UserBaseSchema(BaseModel):
     last_name: str
     email: EmailStr
 
+    # if you`re working with db directly (take some information from db)
     class Config:
         orm_mode = True
 
@@ -45,5 +46,5 @@ class UserResponse(UserBaseSchema):
 class ListUsersResponse(BaseModel):
     status: str
     result: int
-    users: List[UserResponse]
+    users: List[UserResponse] = []
 

@@ -15,7 +15,7 @@ async def get_users(db: Session = Depends(get_db), limit: int = 10, page: int = 
 
     users = db.query(models.User).group_by(models.User.id).filter(
         models.User.last_name.contains(search)).limit(limit).offset(skip).all()
-    return {'status': 'success', 'result': len(users), 'users': users}
+    return schemas.ListUsersResponse(status='success', result=len(users), users=users)
 
 
 # Create user
@@ -35,7 +35,7 @@ async def update_user(id: str, user: schemas.UpdateUserSchema, db: Session = Dep
     db_user = user_query.first()
 
     if not db_user:
-        raise HTTPException(status_code=status.HTTP_200_OK, detail=f'No user with this id: {id} found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'No user with this id: {id} found')
     if db_user.id != uuid.UUID(id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You are not allowed to perform this action!')
     user.id = db_user.id
@@ -55,7 +55,7 @@ async def get_user(id: str, db: Session = Depends(get_db)):
 
 
 # Delete user
-@router.delete('/{id}')
+@router.delete('/{id}', response_model=schemas.UserResponse)
 async def delete_user(id: str, db: Session = Depends(get_db)):
     user_query = db.query(models.User).filter(models.User.id == id)
     user = user_query.first()
