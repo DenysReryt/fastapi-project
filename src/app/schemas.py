@@ -44,6 +44,6 @@ class UserResponse(UserBaseSchema):
 
 class ListUsersResponse(BaseModel):
     status: str
-    results: int
+    result: int
     users: List[UserResponse]
 

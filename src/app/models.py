@@ -17,4 +17,4 @@ class User(Base):
     verification_code = Column(String, nullable=True, unique=True)
     role = Column(String, server_default='user', nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    updated_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=func.now(), nullable=False)

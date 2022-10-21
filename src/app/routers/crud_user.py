@@ -39,7 +39,6 @@ async def update_user(id: str, user: schemas.UpdateUserSchema, db: Session = Dep
     if db_user.id != uuid.UUID(id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You are not allowed to perform this action!')
     user.id = db_user.id
-    user.updated_at = db_user.updated_at
     user_query.update(user.dict(exclude_none=True), synchronize_session=False)
     db.commit()
     return db_user
