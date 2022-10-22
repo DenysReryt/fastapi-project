@@ -56,7 +56,7 @@ async def update_user(user: schemas.UpdateUserSchema, id: int = Path(..., gt=0))
         "id": user_id,
         "first_name": user.first_name,
         "last_name": user.last_name,
-        "role": user.role,
+        "role": user.role
     }
     return response_object
 

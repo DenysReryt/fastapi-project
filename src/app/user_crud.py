@@ -26,7 +26,8 @@ class UserCrud():
         query = (users.update().where(id == users.c.id).values(
             first_name=user.first_name,
             last_name=user.last_name,
-            role=user.role)
+            role=user.role
+        )
             .returning(users.c.id))
         return await database.execute(query=query)
 
