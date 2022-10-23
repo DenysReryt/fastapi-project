@@ -35,7 +35,7 @@ async def get_user(id: int = Path(..., gt=0)):
 
 
 # Create user
-@router.post('/', response_model=schemas.SignUpSchema)
+@router.post('/', response_model=schemas.UserBaseSchema)
 async def create_user(user: schemas.SignUpSchema):
     db_user = await crud.get_user_by_email(email=user.email)
     if db_user:
@@ -44,21 +44,12 @@ async def create_user(user: schemas.SignUpSchema):
 
 
 # Update user
-@router.put('/{id}', response_model=schemas.UpdateUserSchema)
+@router.put('/{id}', response_model=schemas.UserBaseSchema)
 async def update_user(user: schemas.UpdateUserSchema, id: int = Path(..., gt=0)):
     db_user = await crud.get_user_by_id(id)
     if not db_user:
         raise HTTPException(status_code=404, detail='User not found')
-
-    user_id = await crud.update_user(id, user)
-
-    response_object = {
-        "id": user_id,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "role": user.role
-    }
-    return response_object
+    return await crud.update_user(id=id, user=user)
 
 
 # Delete user

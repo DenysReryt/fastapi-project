@@ -7,7 +7,7 @@ class UserBaseSchema(BaseModel):
     id: int
     first_name: str
     last_name: str
-    role: str
+    role: str = 'user'
     email: EmailStr
     created_at: datetime
     updated_at: datetime
