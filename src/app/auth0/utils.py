@@ -9,6 +9,16 @@ from src.app.user_crud import crud
 
 token_auth_scheme = HTTPBearer()
 
+async def get_email_from_token(response: Response, token: str = Depends(token_auth_scheme)):
+    pyload_from_auth = VerifyToken(token.credentials).verify()
+    if pyload_from_auth.get("status"):
+        pyload_from_me = VerifyToken(token.credentials).verify_my()
+        if pyload_from_me.get("status"):
+            response.status_code = status.HTTP_400_BAD_REQUEST
+            return response
+        return pyload_from_me.get("email")
+    return pyload_from_auth.get("email")
+
 async def create_access_token(email: str, expires_delta: timedelta = None) -> str:
     if expires_delta:
         expire = datetime.utcnow() + expires_delta

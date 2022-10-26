@@ -9,7 +9,7 @@ from src.app.user_crud import crud
 from src.app import schemas
 
 from src.app.config import settings
-from src.app.auth0.utils import create_access_token, get_current_user, set_up
+from src.app.auth0.utils import create_access_token, get_current_user, set_up, get_email_from_token
 
 from datetime import timedelta
 
@@ -83,19 +83,17 @@ async def create_user(user: schemas.SignUpSchema):
 
 
 # Update user
-@router.put('/{id}', response_model=schemas.UserBaseSchema)
-async def update_user(user: schemas.UpdateUserSchema, id: int = Path(..., gt=0)):
-    db_user = await crud.get_user_by_id(id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail='User not found')
-    return await crud.update_user(id=id, user=user)
+@router.put('/update')
+async def update_user(user: schemas.UpdateUserSchema, email: str = Depends(get_email_from_token)):
+    if user.email == email:
+        return await crud.update_user(user)
+    return HTTPException(status_code=400, detail='No user with this email or no permission to execute')
 
 
 # Delete user
-@router.delete('/{id}', response_model=schemas.UserBaseSchema)
-async def delete_user(id: int = Path(..., gt=0)):
-    user = await crud.get_user_by_id(id)
-    if not user:
-        raise HTTPException(status_code=404, detail='User not found')
-    await crud.delete(id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/delete')
+async def delete_user(user: schemas.DeleteUser, email: str = Depends(get_email_from_token)):
+    if user.email == email:
+        await crud.delete(email)
+        return HTTPException(status_code=200, detail='User has been deleted')
+    return HTTPException(status_code=400, detail='No user was found')
