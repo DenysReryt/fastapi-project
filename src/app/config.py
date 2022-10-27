@@ -7,6 +7,7 @@ from pathlib import Path
 env_path = Path('../..') / '.env'
 load_dotenv(dotenv_path=env_path)
 
+
 class Settings(BaseSettings):
     DB_PORT: int = os.getenv('DB_PORT')
     DB_PASSWORD: str = os.getenv('DB_PASSWORD')
@@ -17,6 +18,17 @@ class Settings(BaseSettings):
 
     CLIENT_ORIGIN: str = os.getenv('CLIENT_ORIGIN')
 
-    REDIS_URL = os.getenv("REDIS_URL")
+    REDIS_URL: str = os.getenv("REDIS_URL")
+
+    DOMAIN: str = os.getenv('DOMAIN')
+    API_AUDIENCE: str = os.getenv("API_AUDIENCE")
+    SECRET: str = os.getenv("SECRET")
+    ALGORITHMS: str = os.getenv("ALGORITHMS")
+    MY_ALGORITHMS: str = os.getenv("MY_ALGORITHMS")
+    ISSUER: str = os.getenv("ISSUER")
+    CLIENT_ID: str = os.getenv("CLIENT_ID")
+    CLIENT_SECRET: str = os.getenv("CLIENT_SECRET")
+    CONNECTION: str = os.getenv("CONNECTION")
+    ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 settings = Settings()

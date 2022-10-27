@@ -1,3 +1,5 @@
+import aioredis
+from src.app.database import database
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.app.config import settings
@@ -27,16 +29,16 @@ def root():
     return {'status': 'Working'}
 
 
-# @app.on_event("startup")
-# async def startup():
-#     await database.connect()
-#     app.state.redis = await aioredis.from_url(REDIS_URL)
-#
-#
-# @app.on_event("shutdown")
-# async def shutdown():
-#     await database.disconnect()
-#     await app.state.redis.close()
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+    app.state.redis = await aioredis.from_url(settings.REDIS_URL)
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
+    await app.state.redis.close()
 
 
 if __name__ == '__main__':

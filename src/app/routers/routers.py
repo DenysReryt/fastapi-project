@@ -1,22 +1,61 @@
-from fastapi import APIRouter, HTTPException, Path, Response, status
+from fastapi import APIRouter, HTTPException, Path, Response, status, Depends
+
 from typing import List
-from src.app.database import database, engine, metadata
-from src.app.user_crud import UserCrud as crud
+
+import http.client
+
+from src.app.database import engine, metadata
+from src.app.user_crud import crud
 from src.app import schemas
+
+from src.app.config import settings
+from src.app.auth0.utils import create_access_token, get_current_user, set_up
+
+from datetime import timedelta
 
 metadata.create_all(bind=engine)
 
 router = APIRouter()
 
 
-@router.on_event('startup')
-async def startup():
-    await database.connect()
+@router.get("/login/me", tags=["auth"])
+def get_me(user: schemas.UserBaseSchema = Depends(get_current_user)):
+    return user
 
+@router.post("/login/", tags=["auth"])
+async def sign_in_my(user: schemas.SignInUserSchema):
+    user_check = await crud.get_user_by_email(user.email)
+    if user_check and user_check.password == user.password:
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        token = await create_access_token(user.email, expires_delta=access_token_expires)
+        return token
+    else:
+        raise HTTPException(status_code=400, detail="No such user or incorrect email, password")
 
-@router.on_event('shutdown')
-async def shutdown():
-    await database.disconnect()
+@router.post("/register/", tags=["auth"])
+async def sign_up_my(user: schemas.SignUpSchema):
+    does_exist = await crud.get_user_by_email(email=user.email)
+    if does_exist:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    config = set_up()
+    conn = http.client.HTTPSConnection(config['DOMAIN'])
+    pyload="{" \
+            f"\"client_id\":\"{config['CLIENT_ID']}\"," \
+            f"\"client_secret\":\"{config['CLIENT_SECRET']}\"," \
+            f"\"audience\":\"{config['API_AUDIENCE']}\"," \
+            f"\"email\":\"{user.email}\"," \
+            f"\"password\":\"{user.password}\"," \
+            f"\"connection\":\"{config['CONNECTION']}\"," \
+            f"\"grant_type\":\"client_credentials\"" \
+           "}"
+    headers = {"content-type": "application/json"}
+    conn.request("POST", "/dbconnections/signup", pyload, headers)
+    conn.getresponse()
+
+    user = await crud.create_user(user)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = await create_access_token(user.email, expires_delta=access_token_expires)
+    return token
 
 
 # Get all users
