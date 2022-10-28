@@ -2,6 +2,7 @@ from src.app.database import database
 from src.app.models import users
 from src.app import schemas
 import datetime
+import secrets
 
 from src.app.schemas import UserBaseSchema
 
@@ -10,10 +11,9 @@ class UserCrud():
 
     async def create_user_by_email(self, email: str) -> UserBaseSchema:
         db_user = users.insert().values(first_name='first_name', last_name="last_name", email=email,
-                                        password='password', role='user', verified=False)
-        user_id = await database.execute(db_user)
-        user = await database.fetch_one(users.select().where(users.c.email == email))
-        return schemas.UserBaseSchema(**user.dict(), id=user_id, created_at=datetime.datetime.now(), updated_at=datetime.datetime.now())
+                                        password=str(secrets.token_hex(10)), role='user', verified=False)
+        user = await database.execute(db_user)
+        return schemas.UserBaseSchema(**user)
 
     async def get_users(self, skip: int = 0, limit: int = 100) -> UserBaseSchema:
         query = users.select().offset(skip).limit(limit)

@@ -9,7 +9,7 @@ from src.app.user_crud import crud
 from src.app import schemas
 
 from src.app.config import settings
-from src.app.auth0.utils import create_access_token, get_current_user, set_up, get_email_from_token
+from src.app.auth0.utils import create_access_token, get_current_user, set_up, get_email_from_token, auth_request
 
 from datetime import timedelta
 
@@ -22,7 +22,7 @@ router = APIRouter()
 def get_me(user: schemas.UserBaseSchema = Depends(get_current_user)):
     return user
 
-@router.post("/login/", tags=["auth"])
+@router.post("/login/", tags=["auth"], status_code=status.HTTP_200_OK)
 async def sign_in_my(user: schemas.SignInUserSchema):
     user_check = await crud.get_user_by_email(user.email)
     if user_check and user_check.password == user.password:
@@ -32,25 +32,13 @@ async def sign_in_my(user: schemas.SignInUserSchema):
     else:
         raise HTTPException(status_code=400, detail="No such user or incorrect email, password")
 
-@router.post("/register/", tags=["auth"])
+@router.post("/register/", tags=["auth"], status_code=status.HTTP_200_OK)
 async def sign_up_my(user: schemas.SignUpSchema):
     does_exist = await crud.get_user_by_email(email=user.email)
     if does_exist:
         raise HTTPException(status_code=400, detail="Email already registered")
     config = set_up()
-    conn = http.client.HTTPSConnection(config['DOMAIN'])
-    pyload="{" \
-            f"\"client_id\":\"{config['CLIENT_ID']}\"," \
-            f"\"client_secret\":\"{config['CLIENT_SECRET']}\"," \
-            f"\"audience\":\"{config['API_AUDIENCE']}\"," \
-            f"\"email\":\"{user.email}\"," \
-            f"\"password\":\"{user.password}\"," \
-            f"\"connection\":\"{config['CONNECTION']}\"," \
-            f"\"grant_type\":\"client_credentials\"" \
-           "}"
-    headers = {"content-type": "application/json"}
-    conn.request("POST", "/dbconnections/signup", pyload, headers)
-    conn.getresponse()
+    auth_request(config=config, user=user)
 
     user = await crud.create_user(user)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
