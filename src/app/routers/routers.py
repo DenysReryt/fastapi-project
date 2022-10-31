@@ -71,11 +71,11 @@ async def create_user(user: schemas.SignUpSchema):
 
 
 # Update user
-@router.put('/update')
+@router.put('/update', response_model=schemas.UserBaseSchema)
 async def update_user(user: schemas.UpdateUserSchema, email: str = Depends(get_email_from_token)):
     if user.email == email:
         return await crud.update_user(user)
-    return HTTPException(status_code=400, detail='No user with this email or no permission to execute')
+    raise HTTPException(status_code=400, detail='No user with this email or no permission to execute')
 
 
 # Delete user

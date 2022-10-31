@@ -117,7 +117,7 @@ class VerifyToken():
                 issuer=self.config["ISSUER"],
             )
         except Exception as e:
-            return HTTPException(status_code=400, detail=e)
+            raise HTTPException(status_code=400, detail=e)
 
         if self.scopes:
             result = self._check_claims(payload, 'scope', str, self.scopes.split(' '))
@@ -139,7 +139,7 @@ class VerifyToken():
                 algorithms=[self.config["MY_ALGORITHMS"]],
             )
         except Exception as e:
-            return HTTPException(status_code=400, detail=e)
+            raise HTTPException(status_code=400, detail=e)
 
         return payload
 

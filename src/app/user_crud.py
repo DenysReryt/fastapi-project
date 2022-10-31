@@ -13,7 +13,7 @@ class UserCrud():
         db_user = users.insert().values(first_name='first_name', last_name="last_name", email=email,
                                         password=str(secrets.token_hex(10)), role='user', verified=False)
         user = await database.execute(db_user)
-        return schemas.UserBaseSchema(**user)
+        return schemas.UserBaseSchema(id=user, email=email, created_at=datetime.datetime.now(), updated_at=datetime.datetime.now())
 
     async def get_users(self, skip: int = 0, limit: int = 100) -> UserBaseSchema:
         query = users.select().offset(skip).limit(limit)
