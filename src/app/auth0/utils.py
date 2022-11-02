@@ -1,10 +1,8 @@
-import os
 import http.client
 import jwt
 from datetime import datetime, timedelta
-from configparser import ConfigParser
 from src.app.config import settings
-from fastapi import Response, Depends, HTTPException, status
+from fastapi import Response, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from src.app.user_crud import crud
 
@@ -28,14 +26,13 @@ def auth_request(config, user):
 
 
 async def get_email_from_token(response: Response, token: str = Depends(token_auth_scheme)):
-    pyload_from_auth = VerifyToken(token.credentials).verify(response)
-    if type(pyload_from_auth) is HTTPException:
-        pyload_from_me = VerifyToken(token.credentials).verify_my(response)
-        if type(pyload_from_me) is HTTPException:
-            response.status_code = status.HTTP_400_BAD_REQUEST
-            return response
+    if jwt.get_unverified_header(token.credentials).get('alg') == 'RS256':
+        pyload_from_auth = VerifyToken(token.credentials).verify()
+        return pyload_from_auth.get("email")
+    else:
+        pyload_from_me = VerifyToken(token.credentials).verify_my()
         return pyload_from_me.get("email")
-    return pyload_from_auth.get("email")
+
 
 async def create_access_token(email: str, expires_delta: timedelta = None) -> str:
     if expires_delta:
@@ -51,21 +48,18 @@ async def create_access_token(email: str, expires_delta: timedelta = None) -> st
 
 
 async def get_current_user(response: Response, token: str = Depends(token_auth_scheme)):
-    pyload_from_auth = VerifyToken(token.credentials).verify(response)
-    if type(pyload_from_auth) is HTTPException:
-        pyload_from_me = VerifyToken(token.credentials).verify_my(response)
-        if type(pyload_from_me) is HTTPException:
-            response.status_code = status.HTTP_400_BAD_REQUEST
-            return response
-
-        user = await crud.get_user_by_email(pyload_from_me.get("email"))
+    if jwt.get_unverified_header(token.credentials).get('alg') == 'RS256':
+        pyload_from_auth = VerifyToken(token.credentials).verify()
+        user = await crud.get_user_by_email(email=pyload_from_auth.get("email"))
+        if not user:
+            user = await crud.create_user_by_email(email=pyload_from_auth.get("email"))
+        return user
+    else:
+        pyload_from_me = VerifyToken(token.credentials).verify_my()
+        user = await crud.get_user_by_email(email=pyload_from_me.get("email"))
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         return user
-    user = await crud.get_user_by_email(email=pyload_from_auth.get("email"))
-    if not user:
-        user = await crud.create_user_by_email(email=pyload_from_auth.get("email"))
-    return user
 
 
 def set_up():
@@ -97,16 +91,16 @@ class VerifyToken():
         jwks_url = f'https://{self.config["DOMAIN"]}/.well-known/jwks.json'
         self.jwks_client = jwt.PyJWKClient(jwks_url)
 
-    def verify(self, response: Response):
+    def verify(self):
         # This gets the 'kid' from the passed token
         try:
             self.signing_key = self.jwks_client.get_signing_key_from_jwt(
                 self.token
             ).key
         except jwt.exceptions.PyJWKClientError as error:
-            return HTTPException(status_code=400, detail=error)
+            raise HTTPException(status_code=400, detail=str(error))
         except jwt.exceptions.DecodeError as error:
-            return HTTPException(status_code=400, detail=error)
+            raise HTTPException(status_code=400, detail=str(error))
 
         try:
             payload = jwt.decode(
@@ -117,7 +111,7 @@ class VerifyToken():
                 issuer=self.config["ISSUER"],
             )
         except Exception as e:
-            raise HTTPException(status_code=400, detail=e)
+            raise HTTPException(status_code=400, detail=str(e))
 
         if self.scopes:
             result = self._check_claims(payload, 'scope', str, self.scopes.split(' '))
@@ -131,7 +125,7 @@ class VerifyToken():
 
         return payload
 
-    def verify_my(self, response: Response):
+    def verify_my(self):
         try:
             payload = jwt.decode(
                 self.token,
@@ -139,7 +133,7 @@ class VerifyToken():
                 algorithms=[self.config["MY_ALGORITHMS"]],
             )
         except Exception as e:
-            raise HTTPException(status_code=400, detail=e)
+            raise HTTPException(status_code=400, detail=str(e))
 
         return payload
 

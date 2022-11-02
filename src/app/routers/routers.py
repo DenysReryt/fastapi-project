@@ -25,12 +25,15 @@ def get_me(user: schemas.UserBaseSchema = Depends(get_current_user)):
 @router.post("/login/", tags=["auth"], status_code=status.HTTP_200_OK)
 async def sign_in_my(user: schemas.SignInUserSchema):
     user_check = await crud.get_user_by_email(user.email)
-    if user_check and user_check.password == user.password:
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        token = await create_access_token(user.email, expires_delta=access_token_expires)
-        return token
+    if user_check:
+        if user_check.password == user.password:
+            access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            token = await create_access_token(user.email, expires_delta=access_token_expires)
+            return token
+        else:
+            raise HTTPException(status_code=400, detail='Incorrect password')
     else:
-        raise HTTPException(status_code=400, detail="No such user or incorrect email, password")
+        raise HTTPException(status_code=400, detail="No such user or incorrect email")
 
 @router.post("/register/", tags=["auth"], status_code=status.HTTP_200_OK)
 async def sign_up_my(user: schemas.SignUpSchema):
@@ -79,7 +82,7 @@ async def update_user(user: schemas.UpdateUserSchema, email: str = Depends(get_e
 
 
 # Delete user
-@router.delete('/delete')
+@router.delete('/delete', status_code=status.HTTP_200_OK)
 async def delete_user(user: schemas.DeleteUser, email: str = Depends(get_email_from_token)):
     if user.email == email:
         await crud.delete(email)
