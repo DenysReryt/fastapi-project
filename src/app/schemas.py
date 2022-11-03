@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import List
+from typing import Optional
 from pydantic import BaseModel, EmailStr, constr
 
 
 class UserBaseSchema(BaseModel):
     id: int
-    first_name: str
-    last_name: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     role: str = 'user'
     email: EmailStr
     created_at: datetime
@@ -31,10 +31,11 @@ class SignUpSchema(BaseModel):
     verified: bool = False
 
 
-class UpdateUserSchema(BaseModel):
+class UpdateUserSchema(SignInUserSchema):
     first_name: str
     last_name: str
     role: str = 'user'
+    password: constr(min_length=8)
 
     class Config:
         orm_mode = True
@@ -53,3 +54,6 @@ class ListUsersResponse(BaseModel):
     email: EmailStr
     created_at: datetime
 
+
+class DeleteUser(BaseModel):
+    email: EmailStr

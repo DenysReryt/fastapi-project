@@ -9,7 +9,7 @@ from src.app.user_crud import crud
 from src.app import schemas
 
 from src.app.config import settings
-from src.app.auth0.utils import create_access_token, get_current_user, set_up
+from src.app.auth0.utils import create_access_token, get_current_user, set_up, get_email_from_token, auth_request
 
 from datetime import timedelta
 
@@ -22,35 +22,26 @@ router = APIRouter()
 def get_me(user: schemas.UserBaseSchema = Depends(get_current_user)):
     return user
 
-@router.post("/login/", tags=["auth"])
+@router.post("/login/", tags=["auth"], status_code=status.HTTP_200_OK)
 async def sign_in_my(user: schemas.SignInUserSchema):
     user_check = await crud.get_user_by_email(user.email)
-    if user_check and user_check.password == user.password:
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        token = await create_access_token(user.email, expires_delta=access_token_expires)
-        return token
+    if user_check:
+        if user_check.password == user.password:
+            access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            token = await create_access_token(user.email, expires_delta=access_token_expires)
+            return token
+        else:
+            raise HTTPException(status_code=400, detail='Incorrect password')
     else:
-        raise HTTPException(status_code=400, detail="No such user or incorrect email, password")
+        raise HTTPException(status_code=400, detail="No such user or incorrect email")
 
-@router.post("/register/", tags=["auth"])
+@router.post("/register/", tags=["auth"], status_code=status.HTTP_200_OK)
 async def sign_up_my(user: schemas.SignUpSchema):
     does_exist = await crud.get_user_by_email(email=user.email)
     if does_exist:
         raise HTTPException(status_code=400, detail="Email already registered")
     config = set_up()
-    conn = http.client.HTTPSConnection(config['DOMAIN'])
-    pyload="{" \
-            f"\"client_id\":\"{config['CLIENT_ID']}\"," \
-            f"\"client_secret\":\"{config['CLIENT_SECRET']}\"," \
-            f"\"audience\":\"{config['API_AUDIENCE']}\"," \
-            f"\"email\":\"{user.email}\"," \
-            f"\"password\":\"{user.password}\"," \
-            f"\"connection\":\"{config['CONNECTION']}\"," \
-            f"\"grant_type\":\"client_credentials\"" \
-           "}"
-    headers = {"content-type": "application/json"}
-    conn.request("POST", "/dbconnections/signup", pyload, headers)
-    conn.getresponse()
+    auth_request(config=config, user=user)
 
     user = await crud.create_user(user)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -83,19 +74,17 @@ async def create_user(user: schemas.SignUpSchema):
 
 
 # Update user
-@router.put('/{id}', response_model=schemas.UserBaseSchema)
-async def update_user(user: schemas.UpdateUserSchema, id: int = Path(..., gt=0)):
-    db_user = await crud.get_user_by_id(id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail='User not found')
-    return await crud.update_user(id=id, user=user)
+@router.put('/update', response_model=schemas.UserBaseSchema)
+async def update_user(user: schemas.UpdateUserSchema, email: str = Depends(get_email_from_token)):
+    if user.email == email:
+        return await crud.update_user(user)
+    raise HTTPException(status_code=400, detail='No user with this email or no permission to execute')
 
 
 # Delete user
-@router.delete('/{id}', response_model=schemas.UserBaseSchema)
-async def delete_user(id: int = Path(..., gt=0)):
-    user = await crud.get_user_by_id(id)
-    if not user:
-        raise HTTPException(status_code=404, detail='User not found')
-    await crud.delete(id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/delete', status_code=status.HTTP_200_OK)
+async def delete_user(user: schemas.DeleteUser, email: str = Depends(get_email_from_token)):
+    if user.email == email:
+        await crud.delete(email)
+        return HTTPException(status_code=200, detail='User has been deleted')
+    return HTTPException(status_code=400, detail='No user was found')

@@ -29,6 +29,6 @@ class Settings(BaseSettings):
     CLIENT_ID: str = os.getenv("CLIENT_ID")
     CLIENT_SECRET: str = os.getenv("CLIENT_SECRET")
     CONNECTION: str = os.getenv("CONNECTION")
-    ACCESS_TOKEN_EXPIRE_MINUTES = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 settings = Settings()
