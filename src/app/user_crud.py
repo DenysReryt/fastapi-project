@@ -26,7 +26,7 @@ class UserCrud():
         user_id = await database.execute(db_user)
         return schemas.UserBaseSchema(**user.dict(), id=user_id, created_at=datetime.datetime.now(), updated_at=datetime.datetime.now())
 
-    async def get_user_by_email(self, email: str) -> Any:
+    async def get_user_by_email(self, email: str) -> UserBaseSchema:
         user = await database.fetch_one(users.select().where(users.c.email == email))
         return user
 
