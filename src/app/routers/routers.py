@@ -98,9 +98,14 @@ async def create_company(company: schemas.MainCompany, owner: schemas.UserBaseSc
 
 
 #Update company
-@router.put('/companies/update{company_id}', tags=['Companies'], response_model=schemas.CompanyBaseSchema)
+@router.put('/companies/update/{company_id}', tags=['Companies'], response_model=schemas.CompanyBaseSchema)
 async def update_comapny(company: schemas.MainCompany, company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
-    company_id = await company_crud.get_company_by_id(company_id)
-    if not company_id:
+    get_company = await company_crud.get_company_by_id(company_id)
+    if not get_company:
         raise HTTPException(status_code=404, detail='Company not found')
-    return await company_crud.update_company(company=company, company_id=company_id)
+    if get_company.owner_id != user.id:
+        raise HTTPException(status_code=403, detail='You are not the owner')
+    return await company_crud.update_company(company=company, company_id=company_id, user_id=user.id)
+
+
+# Delete company

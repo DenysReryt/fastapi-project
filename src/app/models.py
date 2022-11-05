@@ -1,12 +1,13 @@
 from src.app.database import metadata
 from sqlalchemy import Integer, TIMESTAMP, Column, String, Boolean, text, DateTime, Table, ForeignKey
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 
 user_companies = Table(
     'user_companies',
     metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('company_id', Integer, ForeignKey('companies.id'), primary_key=True)
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='cascade'), primary_key=True),
+    Column('company_id', Integer, ForeignKey('companies.id', ondelete='cascade'), primary_key=True)
 )
 
 users = Table(
@@ -32,6 +33,6 @@ companies = Table(
     Column('visibility', Boolean, nullable=False, server_default='True'),
     Column('name', String, nullable=False),
     Column('description', String, nullable=False),
-    Column('owner_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('owner_id', Integer, ForeignKey('users.id', ondelete='cascade'), nullable=False),
     Column('created_at', TIMESTAMP(timezone=True), nullable=False, default=func.now()),
 )
