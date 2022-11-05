@@ -1,4 +1,3 @@
-from typing import Any
 from src.app.database import database
 from src.app.models import users
 from src.app import schemas

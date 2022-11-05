@@ -57,3 +57,25 @@ class ListUsersResponse(BaseModel):
 
 class DeleteUser(BaseModel):
     email: EmailStr
+
+
+## Companies
+
+
+class CompanyBaseSchema(BaseModel):
+    id: int
+    visibility: bool = True
+    name: str = 'name'
+    description: str
+    owner_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class MainCompany(BaseModel):
+    visibility: bool = True
+    name: str = 'name'
+    description: str = 'description'
+
