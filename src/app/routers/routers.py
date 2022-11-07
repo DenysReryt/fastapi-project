@@ -220,7 +220,7 @@ async def sent_to_company(company_id: int = Path(..., gt=0), user: schemas.UserB
     if user.id == get_company.owner_id:
         raise HTTPException(status_code=400, detail='You are the owner of this company!')
     else:
-        inv = await inv_crud.create_inv_to_company(user=user.id, company=company_id)
+        inv = await inv_crud2.create_inv_to_company(user=user.id, company=company_id)
         raise HTTPException(status_code=200, detail='Your application is under review')
 
 
