@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-app.include_router(routers.router, tags=['Users'], prefix='/users')
+app.include_router(routers.router)
 
 
 @app.get('/')

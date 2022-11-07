@@ -1,12 +1,10 @@
-from typing import Any
 from src.app.database import database
-from src.app.models import users
+from src.app.models import users, companies, user_companies
 from src.app import schemas
 import datetime
 import secrets
 
 from src.app.schemas import UserBaseSchema
-
 
 class UserCrud():
 
@@ -46,8 +44,12 @@ class UserCrud():
         user_get_id = await database.fetch_one(users.select().where(user.email == users.c.email))
         return schemas.UserBaseSchema(**user.dict(), id=user_get_id.id, created_at=user_get_id.created_at, updated_at=user_get_id.updated_at)
 
-    async def delete(self, email: str) -> None:
-        query = users.delete().where(email == users.c.email)
-        return await database.execute(query=query)
+    async def delete(self, email: str, id: int) -> None:
+        query1 = user_companies.delete().where(id == user_companies.c.user_id)
+        await database.execute(query=query1)
+        query2 = companies.delete().where(id == companies.c.owner_id)
+        await database.execute(query=query2)
+        query3 = users.delete().where(email == users.c.email)
+        return await database.execute(query=query3)
 
 crud = UserCrud()

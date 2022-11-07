@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr, constr
+import enum
 
 
 class UserBaseSchema(BaseModel):
@@ -57,3 +58,55 @@ class ListUsersResponse(BaseModel):
 
 class DeleteUser(BaseModel):
     email: EmailStr
+
+
+## Companies
+class ListCompanies(BaseModel):
+    id: int
+    name: str = 'name'
+    description: str = 'description'
+    owner_id: int
+
+
+class CompanyBaseSchema(BaseModel):
+    id: int
+    visibility: bool = True
+    name: str = 'name'
+    description: str
+    owner_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class CompanyMain(BaseModel):
+    visibility: bool = True
+    name: str = 'name'
+    description: str = 'description'
+
+
+## Invitations
+class Invitation(BaseModel):
+    id: int
+    user_id: int
+    company_id: int
+    status: str = 'on review'
+
+class UsersOfCompany(BaseModel):
+    user_id: int
+    is_admin: bool = False
+
+class ListInvitations(BaseModel):
+    user_id: int
+    status: str = 'on review'
+
+class ListInvitationsCompanies(BaseModel):
+    company_id: int
+    status: str = 'on review'
+
+
+
+
+
+
