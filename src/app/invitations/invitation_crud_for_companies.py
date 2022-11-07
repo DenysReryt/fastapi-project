@@ -9,12 +9,12 @@ from src.app.schemas import Invitation, UsersOfCompany
 
 class InvitationCrud():
 
-    async def admin(self, user: schemas.UsersOfCompany, company_id: int, user_id: int) -> UsersOfCompany:
+    async def admin(self, company_id: int, user_id: int) -> UsersOfCompany:
         query = users_of_company.update().where(user_id == users_of_company.c.user_id, company_id == users_of_company.c.company_id).values(
-            is_admin=user.is_admin).returning(users_of_company.c.user_id, users_of_company.c.company_id)
+            is_admin=True).returning(users_of_company.c.user_id, users_of_company.c.company_id)
         ex = await database.execute(query=query)
-        user_get = await database.fetch_one(users_of_company.select().where)
-        return schemas.UsersOfCompany(**user.dict())
+        user_get = await database.fetch_one(users_of_company.select().where(user_id == users_of_company.c.user_id, company_id == users_of_company.c.company_id))
+        return schemas.UsersOfCompany(user_id=user_id, is_admin=True)
 
 
     async def get_all_users(self, company: int) -> Invitation:
