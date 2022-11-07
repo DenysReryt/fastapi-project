@@ -7,6 +7,7 @@ users_of_company = Table(
     metadata,
     Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), primary_key=True),
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('is_admin', Boolean, nullable=False, server_default='False')
 )
 
 invitations_from_company = Table(

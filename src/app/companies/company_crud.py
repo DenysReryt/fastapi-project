@@ -26,10 +26,10 @@ class CompanyCrud():
         return schemas.CompanyBaseSchema(**company.dict(), id=company_id, owner_id=owner, created_at=datetime.datetime.now())
 
     async def update_company(self, company: schemas.CompanyMain, company_id: int, user_id: int) -> CompanyBaseSchema:
-        query = (companies.update().where(company_id == companies.c.id and user_id == companies.c.owner_id).values(
+        query = (companies.update().where(company_id == companies.c.id, user_id == companies.c.owner_id).values(
             name=company.name,
             visibility=company.visibility,
-            description=company.description).returning(company_id == companies.c.id and user_id == companies.c.owner_id))
+            description=company.description).returning(company_id == companies.c.id, user_id == companies.c.owner_id))
         ex = await database.execute(query=query)
         company_get = await database.fetch_one(companies.select().where(company_id == companies.c.id))
         return schemas.CompanyBaseSchema(**company.dict(), id=company_get.id, owner_id=company_get.owner_id, created_at=company_get.created_at)

@@ -9,6 +9,10 @@ from src.app.schemas import Invitation
 
 class InvitationCrud():
 
+    async def get_current_company(self, company: int):
+        query = users_of_company.select().where(company == users_of_company.c.company_id)
+        return await database.fetch_all(query=query)
+
     async def get_inv_from_company(self, user_id: int, company_id: int):
         query = invitations_from_company.select().where(user_id == invitations_from_company.c.user_id, company_id == invitations_from_company.c.company_id)
         return await database.execute(query=query)

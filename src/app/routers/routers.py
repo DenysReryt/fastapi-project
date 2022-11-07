@@ -106,7 +106,7 @@ async def create_company(company: schemas.CompanyMain, owner: schemas.UserBaseSc
 
 #Update company
 @router.put('/companies/update/{company_id}', tags=['Companies'], response_model=schemas.CompanyBaseSchema)
-async def update_comapny(company: schemas.CompanyMain, company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
+async def update_company(company: schemas.CompanyMain, company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
     get_company = await company_crud.get_company_by_id(company_id)
     if not get_company:
         raise HTTPException(status_code=404, detail='Company not found')
@@ -129,6 +129,35 @@ async def delete_company(company_id: int = Path(..., gt=0), user: schemas.UserBa
 
 
 # Invitation
+
+##Users of company
+@router.get('/invitations/users/{company_id}', tags=['Invitations from users'], response_model=List[schemas.UsersOfCompany])
+async def get_users(company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
+    get_company = await company_crud.get_company_by_id(company_id)
+    if not get_company:
+        raise HTTPException(status_code=404, detail='Company not found')
+    get_company2 = await company_crud.get_company_by_id(company_id)
+    if get_company2.owner_id != user.id:
+        raise HTTPException(status_code=403, detail='You are not the owner')
+    else:
+        return await inv_crud.get_all_users(company=company_id)
+
+
+@router.put('/invitations/update/{company_id}/{user_id}', tags=['Invitations from users'], response_model=schemas.UsersOfCompany)
+async def make_admin(company_id: int = Path(..., gt=0), user_id: int = Path(..., gt=0),
+                     res_user: schemas = schemas.UsersOfCompany, user: schemas.UserBaseSchema = Depends(get_current_user)):
+    get_company = await inv_crud2.get_current_company(company=company_id)
+    if not get_company:
+        raise HTTPException(status_code=404, detail='Company not found')
+    get_user = await inv_crud.get_user_by_id2(user_id)
+    if not get_user:
+        raise HTTPException(status_code=400, detail='No user was found')
+    get_company2 = await company_crud.get_company_by_id(company_id)
+    if get_company2.owner_id != user.id:
+        raise HTTPException(status_code=403, detail='You are not the owner')
+    else:
+        return await inv_crud.admin(user=res_user, company_id=company_id, user_id=user_id)
+
 
 ##Invitations from users
 @router.get('/invitations/sent/{company_id}', tags=['Invitations from users'], response_model=List[schemas.ListInvitations])

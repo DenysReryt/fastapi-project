@@ -93,6 +93,10 @@ class Invitation(BaseModel):
     company_id: int
     status: str = 'on review'
 
+class UsersOfCompany(BaseModel):
+    user_id: int
+    is_admin: bool = False
+
 class ListInvitations(BaseModel):
     user_id: int
     status: str = 'on review'
