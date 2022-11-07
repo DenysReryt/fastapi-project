@@ -91,11 +91,15 @@ class Invitation(BaseModel):
     id: int
     user_id: int
     company_id: int
-    status: Optional[bool] = None
+    status: str = 'on review'
 
 class ListInvitations(BaseModel):
     user_id: int
-    status: None
+    status: str = 'on review'
+
+class ListInvitationsCompanies(BaseModel):
+    company_id: int
+    status: str = 'on review'
 
 
 

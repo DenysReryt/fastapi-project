@@ -7,7 +7,6 @@ users_of_company = Table(
     metadata,
     Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), primary_key=True),
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
-    Column('user_email', String, ForeignKey('users.email', ondelete='CASCADE'), unique=True, nullable=False),
 )
 
 invitations_from_company = Table(
@@ -15,7 +14,7 @@ invitations_from_company = Table(
     metadata,
     Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), primary_key=True),
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
-    Column('status', Boolean, server_default='False')
+    Column('status', String, server_default='on review')
 )
 
 
@@ -24,7 +23,7 @@ invitations_from_users = Table(
     metadata,
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
     Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), primary_key=True),
-    Column('status', Boolean, server_default='False')
+    Column('status', String, server_default='on review')
 )
 
 user_companies = Table(
