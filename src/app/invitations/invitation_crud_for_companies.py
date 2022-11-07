@@ -13,7 +13,6 @@ class InvitationCrud():
         query = users_of_company.update().where(user_id == users_of_company.c.user_id, company_id == users_of_company.c.company_id).values(
             is_admin=True).returning(users_of_company.c.user_id, users_of_company.c.company_id)
         ex = await database.execute(query=query)
-        user_get = await database.fetch_one(users_of_company.select().where(user_id == users_of_company.c.user_id, company_id == users_of_company.c.company_id))
         return schemas.UsersOfCompany(user_id=user_id, is_admin=True)
 
 
