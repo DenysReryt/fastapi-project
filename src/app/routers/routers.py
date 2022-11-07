@@ -1,12 +1,11 @@
-from fastapi import APIRouter, HTTPException, Path, Response, status, Depends
+from fastapi import APIRouter, HTTPException, Path, status, Depends
 
 from typing import List
-
-import http.client
 
 from src.app.database import engine, metadata
 from src.app.user_crud import crud
 from src.app.companies.company_crud import company_crud
+from src.app.invitations.invitation_crud import inv_crud
 from src.app import schemas
 
 from src.app.config import settings
@@ -19,6 +18,7 @@ metadata.create_all(bind=engine)
 router = APIRouter()
 
 
+# Auth
 @router.get("/users/login/me", tags=["auth"])
 def get_me(user: schemas.UserBaseSchema = Depends(get_current_user)):
     return user
@@ -66,7 +66,7 @@ async def get_user(id: int = Path(..., gt=0)):
 
 
 # Create user
-@router.post('/users/', tags=['Users'], response_model=schemas.UserBaseSchema)
+@router.post('/users/create', tags=['Users'], response_model=schemas.UserBaseSchema)
 async def create_user(user: schemas.SignUpSchema):
     db_user = await crud.get_user_by_email(email=user.email)
     if db_user:
@@ -83,23 +83,29 @@ async def update_user(user: schemas.UpdateUserSchema, email: str = Depends(get_e
 
 
 # Delete user
-@router.delete('/users/delete', tags=['Users'], status_code=status.HTTP_200_OK)
-async def delete_user(user: schemas.DeleteUser, email: str = Depends(get_email_from_token)):
+@router.delete('/users/delete', tags=[f'Users'], status_code=status.HTTP_200_OK)
+async def delete_user(user: schemas.DeleteUser, email: str = Depends(get_email_from_token), id: schemas.UserResponse = Depends(get_current_user)):
     if user.email == email:
-        await crud.delete(email)
-        return HTTPException(status_code=200, detail='User has been deleted')
-    return HTTPException(status_code=400, detail='No user was found')
+        await crud.delete(email=email, id=id.id)
+        raise HTTPException(status_code=200, detail='User has been deleted')
+    raise HTTPException(status_code=400, detail='No user was found')
+
+
+# Get all companies
+@router.get('/companies/', tags=['Companies'], response_model=List[schemas.ListCompanies])
+async def get_all_companies(skip: int = 0, limit: int = 100):
+    return await company_crud.get_companies(skip=skip, limit=limit)
 
 
 # Create company
-@router.post('/companies/', tags=['Companies'], response_model=schemas.CompanyBaseSchema)
-async def create_company(company: schemas.MainCompany, owner: schemas.UserBaseSchema = Depends(get_current_user)):
+@router.post('/companies/create', tags=['Companies'], response_model=schemas.CompanyBaseSchema)
+async def create_company(company: schemas.CompanyMain, owner: schemas.UserBaseSchema = Depends(get_current_user)):
     return await company_crud.create_company(company=company, owner=owner.id)
 
 
 #Update company
 @router.put('/companies/update/{company_id}', tags=['Companies'], response_model=schemas.CompanyBaseSchema)
-async def update_comapny(company: schemas.MainCompany, company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
+async def update_comapny(company: schemas.CompanyMain, company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
     get_company = await company_crud.get_company_by_id(company_id)
     if not get_company:
         raise HTTPException(status_code=404, detail='Company not found')
@@ -109,3 +115,59 @@ async def update_comapny(company: schemas.MainCompany, company_id: int = Path(..
 
 
 # Delete company
+@router.delete('/companies/delete/{company_id}', tags=['Companies'], status_code=status.HTTP_200_OK)
+async def delete_company(company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
+    get_company = await company_crud.get_company_by_id(company_id)
+    if not get_company:
+        raise HTTPException(status_code=404, detail='Company not found')
+    if get_company.owner_id != user.id:
+        raise HTTPException(status_code=403, detail='You are not the owner')
+    else:
+        await company_crud.delete(company_id)
+        raise HTTPException(status_code=200, detail='Company has been deleted')
+
+
+# Invitation
+
+##Create invitation from user to company
+@router.post('/invitations/sent/{company_id}', tags=['Invitations'], status_code=status.HTTP_200_OK)
+async def sent_to_company(company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
+    get_company = await company_crud.get_company_by_id(company_id)
+    if not get_company:
+        raise HTTPException(status_code=404, detail='Company not found')
+    if user.id == get_company.owner_id:
+        raise HTTPException(status_code=400, detail='You are the owner of this company!')
+    else:
+        inv = await inv_crud.create_inv_to_company(user=user.id, company=company_id)
+        raise HTTPException(status_code=200, detail='Your application is under review')
+
+
+##Invitations from users
+@router.get('/invitations/sent/{company_id}', tags=['Invitations'], response_model=List[schemas.ListInvitations])
+async def get_inv_from_users(company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
+    get_company = await company_crud.get_company_by_id(company_id)
+    if not get_company:
+        raise HTTPException(status_code=404, detail='Company not found')
+    get_company2 = await company_crud.get_company_by_id(company_id)
+    if get_company2.owner_id != user.id:
+        raise HTTPException(status_code=403, detail='You are not the owner')
+    else:
+        return await inv_crud.users_inv(company_id=company_id)
+
+
+##Accept/reject invitations from users
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

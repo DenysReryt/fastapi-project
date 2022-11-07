@@ -1,13 +1,37 @@
 from src.app.database import metadata
 from sqlalchemy import Integer, TIMESTAMP, Column, String, Boolean, text, DateTime, Table, ForeignKey
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+
+users_of_company = Table(
+    'users_of_company',
+    metadata,
+    Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), primary_key=True),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('user_email', String, ForeignKey('users.email', ondelete='CASCADE'), unique=True, nullable=False),
+)
+
+invitations_from_company = Table(
+    'invitations_from_company',
+    metadata,
+    Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), primary_key=True),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('status', Boolean, server_default='False')
+)
+
+
+invitations_from_users = Table(
+    'invitations_from_users',
+    metadata,
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), primary_key=True),
+    Column('status', Boolean, server_default='False')
+)
 
 user_companies = Table(
     'user_companies',
     metadata,
-    Column('user_id', Integer, ForeignKey('users.id', ondelete='cascade'), primary_key=True),
-    Column('company_id', Integer, ForeignKey('companies.id', ondelete='cascade'), primary_key=True)
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), primary_key=True),
 )
 
 users = Table(
@@ -25,7 +49,6 @@ users = Table(
     Column('updated_at', DateTime(timezone=True), default=func.now(), nullable=False)
 )
 
-
 companies = Table(
     'companies',
     metadata,
@@ -33,6 +56,6 @@ companies = Table(
     Column('visibility', Boolean, nullable=False, server_default='True'),
     Column('name', String, nullable=False),
     Column('description', String, nullable=False),
-    Column('owner_id', Integer, ForeignKey('users.id', ondelete='cascade'), nullable=False),
+    Column('owner_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
     Column('created_at', TIMESTAMP(timezone=True), nullable=False, default=func.now()),
 )
