@@ -158,6 +158,9 @@ class BaseResult(BaseModel):
     result: float
     time: datetime
 
+class QuizResult(BaseModel):
+    result: float
+
 class Rating(BaseModel):
     user_id: int
     rating: float

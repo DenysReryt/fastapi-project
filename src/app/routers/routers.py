@@ -361,11 +361,12 @@ async def get_all_questions(quiz_id: int = Path(..., gt=0)) -> schemas.BaseQuest
     return await res_crud.get_questions(quiz_id=quiz_id)
 
 
-# ##Take quiz
-# @router.put()
+##Take quiz
+@router.post('/quizzes/take_quiz/{quiz_id}/', tags=['Take a quiz'], response_model=schemas.QuizResult, status_code=200)
+async def pass_quiz(quiz_id: int = Path(..., gt=0), )
 
 
 @router.get('/set/{key}/{value}/')
 async def test(key: str, value: str, redis=Depends(get_redis)):
     redis.set(key, value)
-    return
+    return redis.get(key)

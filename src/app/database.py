@@ -13,4 +13,4 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 metadata = MetaData()
 
 def get_redis(request: Request) -> aioredis.Redis:
-    return request.app.state.aioredis
+    return request.app.state.redis
