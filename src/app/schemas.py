@@ -124,6 +124,7 @@ class CreateQuiz(BaseModel):
 
 class ListQuizzes(BaseModel):
     id: int
+    company_id: int
     name: str = 'name'
     description: str = 'description'
 

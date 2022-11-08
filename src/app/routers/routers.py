@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Path, status, Depends
 
 from typing import List
 
-from src.app.database import engine, metadata
+from src.app.database import engine, metadata, get_redis
 from src.app.user_crud import crud
 from src.app.companies.company_crud import company_crud
 from src.app.invitations.invitation_crud_for_companies import inv_crud
@@ -364,3 +364,8 @@ async def get_all_questions(quiz_id: int = Path(..., gt=0)) -> schemas.BaseQuest
 # ##Take quiz
 # @router.put()
 
+
+@router.get('/set/{key}/{value}/')
+async def test(key: str, value: str, redis=Depends(get_redis)):
+    redis.set(key, value)
+    return
