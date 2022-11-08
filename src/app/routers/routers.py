@@ -8,6 +8,7 @@ from src.app.companies.company_crud import company_crud
 from src.app.invitations.invitation_crud_for_companies import inv_crud
 from src.app.invitations.invitation_crud_for_users import inv_crud2
 from src.app.quizzes.quiz_crud import quiz_crud
+from src.app.quizzes.take_quiz import res_crud
 from src.app import schemas
 
 from src.app.config import settings
@@ -313,6 +314,8 @@ async def create_question(question: schemas.CreateQuestion, quiz_id: int = Path(
         check_admin = await inv_crud.get_status_admin(company_id=get_current_company.company_id, user_id=user.id)
         if not check_admin:
             raise HTTPException(status_code=403, detail='You are not the owner or admin')
+        if len(question.answers) < 3:
+            raise HTTPException(status_code=404, detail='Min 2 question')
         else:
             return await quiz_crud.post_question(question=question, quiz_id=quiz_id)
 
@@ -348,4 +351,16 @@ async def delete_quiz(quiz_id: int = Path(..., gt=0), user: schemas.UserBaseSche
             raise HTTPException(status_code=200, detail='Successfully deleted')
 
 
+# Result
+##Get questions by quiz_id
+@router.get('/questions/{quiz_id}', tags=['Take a quiz'], response_model=List[schemas.ListQuestion])
+async def get_all_questions(quiz_id: int = Path(..., gt=0)) -> schemas.BaseQuestion:
+    quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
+    if not quiz_get:
+        raise HTTPException(status_code=404, detail='No quiz was found!')
+    return await res_crud.get_questions(quiz_id=quiz_id)
+
+
+# ##Take quiz
+# @router.put()
 

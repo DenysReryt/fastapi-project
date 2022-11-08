@@ -131,11 +131,7 @@ class BaseQuestion(BaseModel):
     question_id: int
     quiz_id: int
     question: str
-    answer_1: str
-    answer_2: str
-    answer_3: str
-    answer_4: str = ''
-    answer_5: str = ''
+    answers: list
     right_answer: str
 
     class Config:
@@ -143,12 +139,27 @@ class BaseQuestion(BaseModel):
 
 class CreateQuestion(BaseModel):
     question: str
-    answer_1: str
-    answer_2: str
-    answer_3: str
-    answer_4: str = ''
-    answer_5: str = ''
+    answers: list
     right_answer: str
+
+class ListQuestion(BaseModel):
+    question_id: int
+    question: str
+    answers: list
+
+
+## Results
+class BaseResult(BaseModel):
+    id: int
+    user_id: int
+    company_id: int
+    quiz_id: int
+    result: float
+    time: datetime
+
+class Rating(BaseModel):
+    user_id: int
+    rating: float
 
 
 

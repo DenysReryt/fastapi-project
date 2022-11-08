@@ -1,7 +1,6 @@
 from src.app.database import metadata
-from sqlalchemy import Integer, TIMESTAMP, Column, String, Boolean, text, DateTime, Table, ForeignKey
+from sqlalchemy import Integer, TIMESTAMP, Column, String, Boolean, text, DateTime, Table, ForeignKey, Float, ARRAY
 from sqlalchemy.sql import func
-
 
 users_of_company = Table(
     'users_of_company',
@@ -79,11 +78,24 @@ questions = Table(
     Column('question_id', Integer, primary_key=True),
     Column('quiz_id', Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False),
     Column('question', String, nullable=False),
-    Column('answer_1', String, nullable=False),
-    Column('answer_2', String, nullable=False),
-    Column('answer_3', String, nullable=False),
-    Column('answer_4', String, nullable=True, server_default=''),
-    Column('answer_5', String, nullable=True, server_default=''),
+    Column('answers', ARRAY(String), nullable=False),
     Column('right_answer', String, nullable=False),
 )
 
+result_quiz = Table(
+    'result_quiz',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('user', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('company', Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False),
+    Column('quiz', Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False),
+    Column('result', Float, nullable=False),
+    Column('time', DateTime, nullable=False)
+)
+
+rating = Table(
+    'rating',
+    metadata,
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('rating', Float, nullable=False)
+)
