@@ -7,6 +7,7 @@ from src.app.user_crud import crud
 from src.app.companies.company_crud import company_crud
 from src.app.invitations.invitation_crud_for_companies import inv_crud
 from src.app.invitations.invitation_crud_for_users import inv_crud2
+from src.app.quizzes.quiz_crud import quiz_crud
 from src.app import schemas
 
 from src.app.config import settings
@@ -25,7 +26,7 @@ def get_me(user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.
     return user
 
 @router.post("/users/login/", tags=["auth"], status_code=status.HTTP_200_OK)
-async def sign_in_my(user: schemas.SignInUserSchema) -> HTTPException | create_access_token:
+async def sign_in_my(user: schemas.SignInUserSchema) -> HTTPException:
     user_check = await crud.get_user_by_email(user.email)
     if user_check:
         if user_check.password == user.password:
@@ -38,7 +39,7 @@ async def sign_in_my(user: schemas.SignInUserSchema) -> HTTPException | create_a
         raise HTTPException(status_code=400, detail="No such user or incorrect email")
 
 @router.post("/users/register/", tags=["auth"], status_code=status.HTTP_200_OK)
-async def sign_up_my(user: schemas.SignUpSchema) -> HTTPException | create_access_token:
+async def sign_up_my(user: schemas.SignUpSchema) -> HTTPException:
     does_exist = await crud.get_user_by_email(email=user.email)
     if does_exist:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -280,7 +281,47 @@ async def accept_company(company_id: int = Path(..., gt=0), user: schemas.UserBa
         raise HTTPException(status_code=200, detail='Successfully accepted')
 
 
+# Quizzes
+##Create quiz
+@router.post('/quizzes/create/{company_id}', tags=['Quizzes'], response_model=schemas.BaseQuiz)
+async def create_quiz(quiz: schemas.CreateQuiz, company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuiz:
+    get_company = await company_crud.get_company_by_id(company_id)
+    if not get_company:
+        raise HTTPException(status_code=404, detail='Company not found')
+    get_company2 = await company_crud.get_company_by_id(company_id)
+    check_admin = await inv_crud.get_status_admin(company_id=company_id, user_id=user.id)
+    if get_company2.owner_id != user.id:
+        if not check_admin:
+            raise HTTPException(status_code=403, detail='You are not the owner or admin')
+    else:
+        return await quiz_crud.post_quiz(quiz=quiz, company=company_id)
 
+
+#Create question
+@router.post('/quizzes/create_question/{quiz_id}/{company_id}', tags=['Quizzes'], response_model=schemas.BaseQuestion)
+async def create_question(question: schemas.CreateQuestion, quiz_id: int = Path(..., gt=0), company_id: int = Path(..., gt=0),
+                          user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuestion:
+    quiz = await quiz_crud.check_quiz(quiz_id=quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail='No quiz was found!')
+    get_company = await company_crud.get_company_by_id(company_id)
+    if not get_company:
+        raise HTTPException(status_code=404, detail='Company not found')
+    get_company2 = await company_crud.get_company_by_id(company_id)
+    check_admin = await inv_crud.get_status_admin(company_id=company_id, user_id=user.id)
+    if get_company2.owner_id != user.id:
+        if not check_admin:
+            raise HTTPException(status_code=403, detail='You are not the owner or admin')
+    else:
+        return await quiz_crud.post_question(question=question, quiz_id=quiz_id)
+
+
+#Update quiz
+# @router.put('/quizzes/update/{quiz_id}}', tags=['Quizzes'], response_model=schemas.BaseQuiz)
+# async def update_quiz(quiz: schemas.CreateQuiz, quiz_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuiz:
+#     if_owner = quiz_crud.get_company_id(quiz_id)
+#     if not if_owner:
+#         raise HTTPException(status_code=403, detail='You are not the owner or admin')
 
 
 

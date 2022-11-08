@@ -15,6 +15,9 @@ class InvitationCrud():
         ex = await database.execute(query=query)
         return schemas.UsersOfCompany(user_id=user_id, is_admin=True)
 
+    async def get_status_admin(self, company_id: int, user_id: int) -> UsersOfCompany:
+        query = users_of_company.select().where(company_id == users_of_company.c.company_id, user_id == users_of_company.c.user_id, users_of_company.c.is_admin == True)
+        return await database.fetch_one(query=query)
 
     async def get_all_users(self, company: int) -> Invitation:
         query = users_of_company.select().where(users_of_company.c.company_id == company)
