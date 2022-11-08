@@ -282,46 +282,70 @@ async def accept_company(company_id: int = Path(..., gt=0), user: schemas.UserBa
 
 
 # Quizzes
+##Get all quizzes
+@router.get('/quizzes/', tags=['Quizzes'], response_model=List[schemas.ListQuizzes])
+async def get_all_quizzes(skip: int = 0, limit: int = 100) -> schemas.BaseQuiz:
+    return await quiz_crud.get_quizzes(skip=skip, limit=limit)
+
+
 ##Create quiz
 @router.post('/quizzes/create/{company_id}', tags=['Quizzes'], response_model=schemas.BaseQuiz)
 async def create_quiz(quiz: schemas.CreateQuiz, company_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuiz:
     get_company = await company_crud.get_company_by_id(company_id)
     if not get_company:
         raise HTTPException(status_code=404, detail='Company not found')
-    get_company2 = await company_crud.get_company_by_id(company_id)
     check_admin = await inv_crud.get_status_admin(company_id=company_id, user_id=user.id)
-    if get_company2.owner_id != user.id:
-        if not check_admin:
-            raise HTTPException(status_code=403, detail='You are not the owner or admin')
+    if not check_admin:
+        raise HTTPException(status_code=403, detail='You are not the owner or admin')
     else:
         return await quiz_crud.post_quiz(quiz=quiz, company=company_id)
 
 
-#Create question
-@router.post('/quizzes/create_question/{quiz_id}/{company_id}', tags=['Quizzes'], response_model=schemas.BaseQuestion)
-async def create_question(question: schemas.CreateQuestion, quiz_id: int = Path(..., gt=0), company_id: int = Path(..., gt=0),
+##Create question
+@router.post('/quizzes/create_question/{quiz_id}', tags=['Quizzes'], response_model=schemas.BaseQuestion)
+async def create_question(question: schemas.CreateQuestion, quiz_id: int = Path(..., gt=0),
                           user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuestion:
     quiz = await quiz_crud.check_quiz(quiz_id=quiz_id)
     if not quiz:
         raise HTTPException(status_code=404, detail='No quiz was found!')
-    get_company = await company_crud.get_company_by_id(company_id)
-    if not get_company:
-        raise HTTPException(status_code=404, detail='Company not found')
-    get_company2 = await company_crud.get_company_by_id(company_id)
-    check_admin = await inv_crud.get_status_admin(company_id=company_id, user_id=user.id)
-    if get_company2.owner_id != user.id:
+    else:
+        get_current_company = await quiz_crud.get_company_by_quiz_id(quiz_id)
+        check_admin = await inv_crud.get_status_admin(company_id=get_current_company.company_id, user_id=user.id)
         if not check_admin:
             raise HTTPException(status_code=403, detail='You are not the owner or admin')
+        else:
+            return await quiz_crud.post_question(question=question, quiz_id=quiz_id)
+
+
+##Update quiz
+@router.put('/quizzes/update_quiz/{quiz_id}', tags=['Quizzes'], response_model=schemas.BaseQuiz)
+async def update_quiz(quiz: schemas.CreateQuiz, quiz_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuiz:
+    quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
+    if not quiz_get:
+        raise HTTPException(status_code=404, detail='No quiz was found!')
     else:
-        return await quiz_crud.post_question(question=question, quiz_id=quiz_id)
+        get_current_company = await quiz_crud.get_company_by_quiz_id(quiz_id)
+        check_admin = await inv_crud.get_status_admin(company_id=get_current_company.company_id, user_id=user.id)
+        if not check_admin:
+            raise HTTPException(status_code=403, detail='You are not the owner or admin')
+        else:
+            return await quiz_crud.put_quiz(quiz=quiz, quiz_id=quiz_id, company_id=get_current_company.company_id)
 
 
-#Update quiz
-# @router.put('/quizzes/update/{quiz_id}}', tags=['Quizzes'], response_model=schemas.BaseQuiz)
-# async def update_quiz(quiz: schemas.CreateQuiz, quiz_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuiz:
-#     if_owner = quiz_crud.get_company_id(quiz_id)
-#     if not if_owner:
-#         raise HTTPException(status_code=403, detail='You are not the owner or admin')
+##Delete Quiz
+@router.delete('/quizzes/delete_quiz/{quiz_id}', tags=['Quizzes'], status_code=200)
+async def delete_quiz(quiz_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
+    quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
+    if not quiz_get:
+        raise HTTPException(status_code=404, detail='No quiz was found!')
+    else:
+        get_current_company = await quiz_crud.get_company_by_quiz_id(quiz_id)
+        check_admin = await inv_crud.get_status_admin(company_id=get_current_company.company_id, user_id=user.id)
+        if not check_admin:
+            raise HTTPException(status_code=403, detail='You are not the owner or admin')
+        else:
+            await quiz_crud.delete(quiz_id=quiz_id)
+            raise HTTPException(status_code=200, detail='Successfully deleted')
 
 
 

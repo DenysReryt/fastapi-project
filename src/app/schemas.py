@@ -122,6 +122,11 @@ class CreateQuiz(BaseModel):
     description: str = 'description'
     frequency: int = 30
 
+class ListQuizzes(BaseModel):
+    id: int
+    name: str = 'name'
+    description: str = 'description'
+
 class BaseQuestion(BaseModel):
     question_id: int
     quiz_id: int

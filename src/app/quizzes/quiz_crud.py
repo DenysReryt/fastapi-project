@@ -8,12 +8,26 @@ from src.app.schemas import BaseQuiz, BaseQuestion
 
 class QuizCrud():
 
+    async def get_quizzes(self, skip: int, limit: int) -> BaseQuiz:
+        query = quizzes.select().offset(skip).limit(limit)
+        return await database.fetch_all(query=query)
+
+    async def get_company_by_quiz_id(self, quiz_id: int) -> BaseQuiz:
+        query = quizzes.select().where(quiz_id == quizzes.c.id)
+        return await database.fetch_one(query=query)
+
     async def post_quiz(self, quiz: schemas.CreateQuiz, company: int) -> BaseQuiz:
         db_quiz = quizzes.insert().values(
             name=quiz.name, description=quiz.description, frequency=quiz.frequency, company_id=company)
         quiz_id = await database.execute(db_quiz)
         return schemas.BaseQuiz(**quiz.dict(), id=quiz_id, company_id=company, created_at=datetime.datetime.now())
 
+    async def put_quiz(self, quiz: schemas.CreateQuiz, quiz_id: int, company_id: int) -> BaseQuiz:
+        query = quizzes.update().where(quiz_id == quizzes.c.id).values(
+            name=quiz.name, description=quiz.description, frequency=quiz.frequency).returning(quizzes.c.id)
+        ex = await database.execute(query=query)
+        quiz_get_time = await database.fetch_one(quizzes.select().where(quiz_id == quizzes.c.id))
+        return schemas.BaseQuiz(**quiz.dict(), id=ex, company_id=company_id, created_at=quiz_get_time.created_at)
 
     async def post_question(self, question: schemas.CreateQuestion, quiz_id: int) -> BaseQuestion:
         db_question = questions.insert().values(question=question.question, answer_1=question.answer_1, answer_2=question.answer_2,
@@ -22,15 +36,15 @@ class QuizCrud():
         question_id = await database.execute(db_question)
         return schemas.BaseQuestion(**question.dict(), question_id=question_id, quiz_id=quiz_id)
 
+    async def delete(self, quiz_id: int) -> BaseQuiz:
+        query1 = questions.delete().where(quiz_id == questions.c.quiz_id)
+        await database.execute(query=query1)
+        query2 = quizzes.delete().where(quiz_id == quizzes.c.id)
+        return await database.execute(query=query2)
+
     async def check_quiz(self, quiz_id) -> BaseQuiz:
         query = quizzes.select().where(quiz_id == quizzes.c.id)
         return await database.fetch_one(query=query)
 
-    async def get_company_id(self, quiz_id: int) -> BaseQuiz:
-        db_company = quizzes.select().where(quiz_id == quizzes.c.id)
-        return await database.fetch_one(db_company)
 
-    async def check_quiz_owner(self, quiz_id: int, company_id: int) -> BaseQuiz:
-        db_check = quizzes.select().where(quiz_id == quizzes.c.id, company_id == quizzes.c.company_id)
-        return await database.fetch_one(db_check)
 quiz_crud = QuizCrud()
