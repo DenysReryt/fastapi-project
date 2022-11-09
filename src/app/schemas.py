@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr, constr
-import enum
 
 
 class UserBaseSchema(BaseModel):
@@ -106,7 +105,61 @@ class ListInvitationsCompanies(BaseModel):
     status: str = 'on review'
 
 
+##Quizzes
+class BaseQuiz(BaseModel):
+    id: int
+    company_id: int
+    name: str = 'name'
+    description: str = 'description'
+    frequency: int = 30
+    created_at: datetime
 
+    class Config:
+        orm_mode = True
+
+class CreateQuiz(BaseModel):
+    name: str = 'name'
+    description: str = 'description'
+    frequency: int = 30
+
+class ListQuizzes(BaseModel):
+    id: int
+    name: str = 'name'
+    description: str = 'description'
+
+class BaseQuestion(BaseModel):
+    question_id: int
+    quiz_id: int
+    question: str
+    answers: list
+    right_answer: str
+
+    class Config:
+        orm_mode = True
+
+class CreateQuestion(BaseModel):
+    question: str
+    answers: list
+    right_answer: str
+
+class ListQuestion(BaseModel):
+    question_id: int
+    question: str
+    answers: list
+
+
+## Results
+class BaseResult(BaseModel):
+    id: int
+    user_id: int
+    company_id: int
+    quiz_id: int
+    result: float
+    time: datetime
+
+class Rating(BaseModel):
+    user_id: int
+    rating: float
 
 
 
