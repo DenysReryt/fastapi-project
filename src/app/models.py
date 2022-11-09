@@ -79,7 +79,14 @@ questions = Table(
     Column('quiz_id', Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False),
     Column('question', String, nullable=False),
     Column('answers', ARRAY(String), nullable=False),
-    Column('right_answer', String, nullable=False),
+)
+
+answers = Table(
+    'answers',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('question_id', Integer, ForeignKey('questions.question_id', ondelete='CASCADE'), nullable=False),
+    Column('answer', String, nullable=False),
 )
 
 result_quiz = Table(

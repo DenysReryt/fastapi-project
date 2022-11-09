@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr, constr
 
 
@@ -92,13 +92,16 @@ class Invitation(BaseModel):
     company_id: int
     status: str = 'on review'
 
+
 class UsersOfCompany(BaseModel):
     user_id: int
     is_admin: bool = False
 
+
 class ListInvitations(BaseModel):
     user_id: int
     status: str = 'on review'
+
 
 class ListInvitationsCompanies(BaseModel):
     company_id: int
@@ -117,10 +120,12 @@ class BaseQuiz(BaseModel):
     class Config:
         orm_mode = True
 
+
 class CreateQuiz(BaseModel):
     name: str = 'name'
     description: str = 'description'
     frequency: int = 30
+
 
 class ListQuizzes(BaseModel):
     id: int
@@ -128,20 +133,21 @@ class ListQuizzes(BaseModel):
     name: str = 'name'
     description: str = 'description'
 
+
 class BaseQuestion(BaseModel):
     question_id: int
     quiz_id: int
     question: str
     answers: list
-    right_answer: str
 
     class Config:
         orm_mode = True
 
+
 class CreateQuestion(BaseModel):
     question: str
     answers: list
-    right_answer: str
+
 
 class ListQuestion(BaseModel):
     question_id: int
@@ -158,12 +164,16 @@ class BaseResult(BaseModel):
     result: float
     time: datetime
 
+
+class AnswerInput(BaseModel):
+    question_id: int = 1
+    answer: str = ''
+
+
 class QuizResult(BaseModel):
     result: float
+
 
 class Rating(BaseModel):
     user_id: int
     rating: float
-
-
-
