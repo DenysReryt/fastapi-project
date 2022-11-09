@@ -370,6 +370,7 @@ async def get_all_questions(quiz_id: int = Path(..., gt=0)) -> schemas.BaseQuest
 @router.post('/quizzes/take_quiz/{quiz_id}/', tags=['Take a quiz'], status_code=200)
 async def pass_quiz(answer_input: List[schemas.AnswerInput], quiz_id: int = Path(..., gt=0),
                     user: schemas.UserBaseSchema = Depends(get_current_user)):
+
     quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
     if not quiz_get:
         raise HTTPException(status_code=404, detail='No quiz was found!')
@@ -377,7 +378,7 @@ async def pass_quiz(answer_input: List[schemas.AnswerInput], quiz_id: int = Path
     right_answers = await res_crud.get_right_answers(quiz_id=quiz_id)
     quiz_score = 0
     list_of_user_answer = [dict(user_answer) for user_answer in answer_input]
-    all_question += len(right_answers)
+
     for i in range(len(right_answers)):
         if list_of_user_answer[i]['answer'] == right_answers[i]['answer']:
             quiz_score += 1
@@ -385,11 +386,8 @@ async def pass_quiz(answer_input: List[schemas.AnswerInput], quiz_id: int = Path
         result = round((float(quiz_score) / len(right_answers)), 3)
     else:
         result = 0
-    rating = round(my_score / all_question, 2)
-    return await res_crud.put_user_result(my_rating=rating, result=result, quiz_id=quiz_id, user_id=user.id, company_id=get_current_company.company_id), len(right_answers), quiz_score
-all_question = 0
-my_score = 0
-print(all_question)
+    return await res_crud.put_user_result(result=result, quiz_id=quiz_id, user_id=user.id, company_id=get_current_company.company_id)
+
 
 # @router.get('/set/{key}/{value}/')
 # async def test(key: str, value: str, redis=Depends(get_redis)):
