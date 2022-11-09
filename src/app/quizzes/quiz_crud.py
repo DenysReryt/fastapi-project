@@ -30,7 +30,7 @@ class QuizCrud():
         return schemas.BaseQuiz(**quiz.dict(), id=ex, company_id=company_id, created_at=quiz_get_time.created_at)
 
     async def post_question(self, question: schemas.CreateQuestion, quiz_id: int, answer: str) -> BaseQuestion:
-        db_question = questions.insert().values(question=question.question, answers=question.answers,
+        db_question = questions.insert().values(question=question.question,
                                                 quiz_id=quiz_id)
         question_id = await database.execute(db_question)
         in_answer = answers.insert().values(question_id=question_id, answer=answer)

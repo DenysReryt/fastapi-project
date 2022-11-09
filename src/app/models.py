@@ -78,7 +78,6 @@ questions = Table(
     Column('question_id', Integer, primary_key=True),
     Column('quiz_id', Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False),
     Column('question', String, nullable=False),
-    Column('answers', ARRAY(String), nullable=False),
 )
 
 answers = Table(

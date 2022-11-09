@@ -315,8 +315,6 @@ async def create_question(question: schemas.CreateQuestion, answer: str, quiz_id
         get_current_company = await quiz_crud.get_company_by_quiz_id(quiz_id)
         check_admin = await inv_crud.get_status_admin(company_id=get_current_company.company_id, user_id=user.id)
         get_company = await company_crud.get_company_by_id(get_current_company.company_id)
-        if len(question.answers) < 3:
-            raise HTTPException(status_code=400, detail='Min 3 question')
         if get_company.owner_id == user.id:
             return await quiz_crud.post_question(question=question, quiz_id=quiz_id, answer=answer)
         if not check_admin:

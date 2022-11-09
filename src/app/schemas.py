@@ -138,7 +138,6 @@ class BaseQuestion(BaseModel):
     question_id: int
     quiz_id: int
     question: str
-    answers: list[str]
 
     class Config:
         orm_mode = True
@@ -146,13 +145,11 @@ class BaseQuestion(BaseModel):
 
 class CreateQuestion(BaseModel):
     question: str
-    answers: list[str]
 
 
 class ListQuestion(BaseModel):
     question_id: int
     question: str
-    answers: list[str]
 
 
 ## Results
