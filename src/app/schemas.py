@@ -112,9 +112,9 @@ class ListInvitationsCompanies(BaseModel):
 class BaseQuiz(BaseModel):
     id: int
     company_id: int
-    name: str = 'name'
-    description: str = 'description'
-    frequency: int = 30
+    name: str
+    description: str
+    frequency: int
     created_at: datetime
 
     class Config:
@@ -122,23 +122,23 @@ class BaseQuiz(BaseModel):
 
 
 class CreateQuiz(BaseModel):
-    name: str = 'name'
-    description: str = 'description'
-    frequency: int = 30
+    name: str
+    description: str
+    frequency: int
 
 
 class ListQuizzes(BaseModel):
     id: int
     company_id: int
-    name: str = 'name'
-    description: str = 'description'
+    name: str
+    description: str
 
 
 class BaseQuestion(BaseModel):
     question_id: int
     quiz_id: int
     question: str
-    answers: list
+    answers: list[str]
 
     class Config:
         orm_mode = True
@@ -146,13 +146,13 @@ class BaseQuestion(BaseModel):
 
 class CreateQuestion(BaseModel):
     question: str
-    answers: list
+    answers: list[str]
 
 
 class ListQuestion(BaseModel):
     question_id: int
     question: str
-    answers: list
+    answers: list[str]
 
 
 ## Results
