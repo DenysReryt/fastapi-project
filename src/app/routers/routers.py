@@ -342,7 +342,7 @@ async def update_quiz(quiz: schemas.CreateQuiz, quiz_id: int = Path(..., gt=0), 
 
 ##Delete Quiz
 @router.delete('/quizzes/delete_quiz/{quiz_id}', tags=['Quizzes'], status_code=200)
-async def delete_quiz(quiz_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)):
+async def delete_quiz(quiz_id: int = Path(..., gt=0), user: schemas.UserBaseSchema = Depends(get_current_user)) -> HTTPException:
     quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
     if not quiz_get:
         raise HTTPException(status_code=404, detail='No quiz was found!')
@@ -369,7 +369,7 @@ async def get_all_questions(quiz_id: int = Path(..., gt=0)) -> schemas.BaseQuest
 ##Take quiz
 @router.post('/quizzes/take_quiz/{quiz_id}/', tags=['Take a quiz'], status_code=200)
 async def pass_quiz(answer_input: List[schemas.AnswerInput], quiz_id: int = Path(..., gt=0),
-                    user: schemas.UserBaseSchema = Depends(get_current_user)):
+                    user: schemas.UserBaseSchema = Depends(get_current_user)) -> HTTPException:
 
     quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
     if not quiz_get:

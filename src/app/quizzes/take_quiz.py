@@ -39,9 +39,5 @@ class ResultCrud():
 
         return result
 
-    # async def user_rating(self, user_id: int):
-    #     query = result_quiz.select().where(user_id == result_quiz.c.user)
-    #     await database.fetch_all(query)
-
 
 res_crud = ResultCrud()
