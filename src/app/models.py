@@ -96,6 +96,7 @@ result_quiz = Table(
     Column('user', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
     Column('company', Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False),
     Column('quiz', Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False),
+    Column('score', String, nullable=False),
     Column('result', Float, nullable=False),
     Column('time', DateTime, nullable=False)
 )

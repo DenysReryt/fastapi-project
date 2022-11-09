@@ -378,15 +378,17 @@ async def pass_quiz(answer_input: List[schemas.AnswerInput], quiz_id: int = Path
     right_answers = await res_crud.get_right_answers(quiz_id=quiz_id)
     quiz_score = 0
     list_of_user_answer = [dict(user_answer) for user_answer in answer_input]
-
-    for i in range(len(right_answers)):
-        if list_of_user_answer[i]['answer'] == right_answers[i]['answer']:
-            quiz_score += 1
-    if quiz_score > 0:
-        result = round((float(quiz_score) / len(right_answers)), 3)
-    else:
-        result = 0
-    return await res_crud.put_user_result(result=result, quiz_id=quiz_id, user_id=user.id, company_id=get_current_company.company_id)
+    try:
+        for i in range(len(right_answers)):
+            if list_of_user_answer[i]['answer'] == right_answers[i]['answer']:
+                quiz_score += 1
+        if quiz_score > 0:
+            result = round((float(quiz_score) / len(right_answers)), 3)
+        else:
+            result = 0
+    except IndexError:
+        raise HTTPException(status_code=400, detail='To pass the quiz you need to answer all the questions')
+    return await res_crud.put_user_result(score=f'{quiz_score}/{len(right_answers)}', result=result, quiz_id=quiz_id, user_id=user.id, company_id=get_current_company.company_id)
 
 
 # @router.get('/set/{key}/{value}/')
