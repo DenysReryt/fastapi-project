@@ -35,7 +35,7 @@ class InvitationCrud():
         query = invitations_from_company.insert().values(user_id=user, company_id=company)
         return await database.execute(query=query)
 
-    async def users_inv(self, company_id) -> Invitation:
+    async def users_inv(self, company_id: int) -> Invitation:
         query = invitations_from_users.select().where(company_id == invitations_from_users.c.company_id)
         return await database.fetch_all(query=query)
 

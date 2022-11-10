@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from src.app.config import settings
 from fastapi import Response, Depends, HTTPException
 from fastapi.security import HTTPBearer
-from src.app.user_crud import crud
+from src.app.users.user_crud import crud
 
 token_auth_scheme = HTTPBearer()
 
