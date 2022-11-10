@@ -1,6 +1,7 @@
 import aioredis
 from fastapi import APIRouter, HTTPException, Path, Depends
 
+import csv
 from typing import List
 
 from src.app.database import engine, metadata
@@ -42,7 +43,7 @@ async def pass_quiz(answer_input: List[schemas.AnswerInput], quiz_id: int = Path
         raise HTTPException(status_code=400, detail='To pass the quiz you need to answer all the questions')
     else:
         redis = await aioredis.from_url(settings.REDIS_URL)
-        redis_key, res_to_save = get_user_result_redis(user_id=user.id, quiz_id=quiz_id, user_answers=answer_input)
+        redis_key, res_to_save = get_user_result_redis(user_id=user.id, quiz_id=quiz_id, user_answers=answer_input, redis_client=redis)
         await redis.hset(redis_key, mapping=res_to_save)
 
         return await res_crud.put_user_result(score=f'{quiz_score}/{len(right_answers)}', result=result, quiz_id=quiz_id,
