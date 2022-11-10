@@ -105,6 +105,7 @@ rating = Table(
     metadata,
     Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
     Column('company_id', Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False),
+    Column('quiz_id', Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False),
     Column('rating', Float, nullable=False),
     Column('time', DateTime, nullable=False)
 )

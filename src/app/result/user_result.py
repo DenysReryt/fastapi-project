@@ -1,8 +1,3 @@
-import csv
-
-from aioredis.client import Redis
-
-
 def make_rating(answer_input: list, right_answers: list):
     try:
         quiz_score = 0
@@ -27,3 +22,22 @@ def get_user_result_redis(user_id: int, quiz_id: int, user_answers: list):
         res_to_save[i['question_id']] = i['answer']
     return redis_key, res_to_save
 
+
+def get_user_pass(get_users: list):
+    dc = {}
+    ls = []
+    for i in get_users:
+        dc[i['user_id']] = {'rating': i['rating'], 'time': i['time']}
+    for key, value in dc.items():
+        ls.append({'user_id': key, 'rating': value['rating'], 'time': value['time']})
+    return ls
+
+
+def get_quiz_last(get_users: list):
+    dc = {}
+    ls = []
+    for i in get_users:
+        dc[i['quiz_id']] = {'rating': i['rating'], 'time': i['time']}
+    for key, value in dc.items():
+        ls.append({'quiz_id': key, 'rating': value['rating'], 'time': value['time']})
+    return ls

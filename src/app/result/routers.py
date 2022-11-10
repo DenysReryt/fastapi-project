@@ -1,7 +1,6 @@
 import aioredis
 from fastapi import APIRouter, HTTPException, Path, Depends
 
-import csv
 from typing import List
 
 from src.app.database import engine, metadata

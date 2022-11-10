@@ -35,7 +35,7 @@ class ResultCrud():
             all_question += int(question)
         my_rating = round((user_answer / all_question), 2)
 
-        query4 = rating.insert().values(rating=my_rating, user_id=user_id, time=datetime.datetime.now(), company_id=company_id)
+        query4 = rating.insert().values(rating=my_rating, user_id=user_id, time=datetime.datetime.now(), company_id=company_id, quiz_id=quiz_id)
         await database.execute(query=query4)
 
         return result

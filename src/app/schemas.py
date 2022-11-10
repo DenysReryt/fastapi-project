@@ -172,11 +172,22 @@ class QuizResult(BaseModel):
 
 
 class Rating(BaseModel):
-    user_id: int
     rating: float
 
 
 #Analytics
 class ListOfUserResults(BaseModel):
-    user_id: int
+    rating: float
+    quiz_id: int
     time: datetime
+
+
+class ListOfUsersResults(BaseModel):
+    user_id: int
+    rating: float
+    time: datetime
+
+
+
+
+
