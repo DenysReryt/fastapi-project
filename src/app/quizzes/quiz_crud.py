@@ -1,5 +1,5 @@
 from src.app.database import database
-from src.app.models import quizzes, questions
+from src.app.models import quizzes, questions, answers
 from src.app import schemas
 import datetime
 
@@ -29,10 +29,12 @@ class QuizCrud():
         quiz_get_time = await database.fetch_one(quizzes.select().where(quiz_id == quizzes.c.id))
         return schemas.BaseQuiz(**quiz.dict(), id=ex, company_id=company_id, created_at=quiz_get_time.created_at)
 
-    async def post_question(self, question: schemas.CreateQuestion, quiz_id: int) -> BaseQuestion:
-        db_question = questions.insert().values(question=question.question, answers=question.answers,
-                                                right_answer=question.right_answer, quiz_id=quiz_id)
+    async def post_question(self, question: schemas.CreateQuestion, quiz_id: int, answer: str) -> BaseQuestion:
+        db_question = questions.insert().values(question=question.question,
+                                                quiz_id=quiz_id)
         question_id = await database.execute(db_question)
+        in_answer = answers.insert().values(question_id=question_id, answer=answer)
+        await database.execute(in_answer)
         return schemas.BaseQuestion(**question.dict(), question_id=question_id, quiz_id=quiz_id)
 
     async def delete(self, quiz_id: int) -> BaseQuiz:
