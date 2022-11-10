@@ -21,7 +21,7 @@ router = APIRouter()
 
 # Result
 ##Get questions by quiz_id
-@router.get('/questions/{quiz_id}', tags=['Take a quiz'], response_model=List[schemas.ListQuestion])
+@router.get('/questions/{quiz_id}', response_model=List[schemas.ListQuestion])
 async def get_all_questions(quiz_id: int = Path(..., gt=0)) -> schemas.BaseQuestion:
     quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
     if not quiz_get:
@@ -30,7 +30,7 @@ async def get_all_questions(quiz_id: int = Path(..., gt=0)) -> schemas.BaseQuest
 
 
 ##Take quiz
-@router.post('/quizzes/take_quiz/{quiz_id}/', tags=['Take a quiz'], status_code=200)
+@router.post('/{quiz_id}/', status_code=200)
 async def pass_quiz(answer_input: List[schemas.AnswerInput], quiz_id: int = Path(..., gt=0),
                     user: schemas.UserBaseSchema = Depends(get_current_user)) -> HTTPException:
     quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
@@ -43,17 +43,9 @@ async def pass_quiz(answer_input: List[schemas.AnswerInput], quiz_id: int = Path
         raise HTTPException(status_code=400, detail='To pass the quiz you need to answer all the questions')
     else:
         redis = await aioredis.from_url(settings.REDIS_URL)
-        redis_key, res_to_save = get_user_result_redis(user_id=user.id, quiz_id=quiz_id, user_answers=answer_input, redis_client=redis)
+        redis_key, res_to_save = get_user_result_redis(user_id=user.id, quiz_id=quiz_id, user_answers=answer_input)
         await redis.hset(redis_key, mapping=res_to_save)
 
         return await res_crud.put_user_result(score=f'{quiz_score}/{len(right_answers)}', result=result, quiz_id=quiz_id,
                                           user_id=user.id, company_id=get_current_company.company_id)
 
-
-
-# def get_user_result(user_id: int, quiz_id: int):
-
-# @router.get('/set/{key}/{value}/')
-# async def test(key: str, value: str, redis=Depends(get_redis)):
-#     redis.set(key, value)
-#     return redis.get(key)
