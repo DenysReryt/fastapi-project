@@ -21,18 +21,22 @@ metadata.create_all(bind=engine)
 
 router = APIRouter()
 
+
 # Get analytic of user
 @router.get('/{user_id}', response_model=List[schemas.ListOfUserResults])
-async def get_user(user: schemas.UserResponse = Depends(get_current_user), quiz_id: int, result: float, user_id: int = Path(..., gt=0)):
-    # get_company = await analytic_crud.get_company_id(user_id)
-    # check_admin = await inv_crud.get_status_admin(company_id=get_company, user_id=user.id)
-    # if get_company.owner_id == user.id:
-    return await analytic_crud.get_user_results(user_id=user_id)
-    # if not check_admin:
-    #     raise HTTPException(status_code=403, detail='You are not the owner or admin')
-    #
+async def get_user(user: schemas.UserResponse = Depends(get_current_user), user_id: int = Path(..., gt=0),
+                   company_id: int = Path(..., gt=0)):
+    get_company = await company_crud.get_company_by_id(company_id)
+    if not get_company:
+        raise HTTPException(status_code=404, detail='Company not found')
+    if get_company.owner_id != user.id:
+        raise HTTPException(status_code=403, detail='You are not the owner')
+    # check_admin = await inv_crud.get_status_admin(company_id=company_id, user_id=user.id)
     # get_user = await analytic_crud.get_user_results(user_id=user_id)
     # if not get_user:
     #     raise HTTPException(status_code=400, detail='the user was not found or the user did not pass any quiz')
-
-
+    # if get_company.owner_id == user.id:
+    #     return await analytic_crud.get_user_results(user_id=user_id)
+    # if not check_admin:
+    #     raise HTTPException(status_code=403, detail='You are not the owner or admin')
+    # return await analytic_crud.get_user_results(user_id=user_id)

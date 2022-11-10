@@ -9,6 +9,7 @@ class AnalyticCrud():
         query = companies.select().where(user_id == companies.c.owner_id)
         return await database.fetch_all(query=query)
 
+
     async def get_user_results(self, user_id: int) -> ListOfUserResults:
         query = rating.select().where(user_id == rating.c.user_id)
         return await database.fetch_all(query=query)

@@ -179,6 +179,4 @@ class Rating(BaseModel):
 #Analytics
 class ListOfUserResults(BaseModel):
     user_id: int
-    quiz_id: int
-    result: float
     time: datetime
