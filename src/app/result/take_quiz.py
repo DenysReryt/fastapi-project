@@ -1,6 +1,6 @@
 from src.app.database import database
 from src.app.models import questions, answers, result_quiz, rating
-from src.app import schemas
+
 import datetime
 
 from src.app.schemas import BaseQuestion, AnswerInput
@@ -40,7 +40,7 @@ class ResultCrud():
         query4 = rating.insert().values(rating=my_rating, user_id=user_id)
         await database.execute(query=query4)
 
-        return {'your_result': result}
+        return result
 
 
 res_crud = ResultCrud()
