@@ -14,15 +14,6 @@ def make_rating(answer_input: list, right_answers: list):
         return 'sqe'
 
 
-def get_user_result_redis(user_id: int, quiz_id: int, user_answers: list):
-    redis_key = f"user_id:{user_id} : quiz_id:{quiz_id}"
-    res_to_save = {}
-    list_of_user_answer = [dict(user_answer) for user_answer in user_answers]
-    for i in list_of_user_answer:
-        res_to_save[i['question_id']] = i['answer']
-    return redis_key, res_to_save
-
-
 def get_user_pass(get_users: list):
     dc = {}
     ls = []
