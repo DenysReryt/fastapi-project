@@ -27,11 +27,8 @@ async def get_users(user: schemas.UserBaseSchema = Depends(get_current_user),
     check_admin = await inv_crud.get_status_admin(company_id=company_id, user_id=user.id)
     if get_company.owner_id == user.id:
         return await analytic_crud.get_users_results(company_id=company_id)
-    if get_company.owner_id != user.id:
-        if not check_admin:
-            raise HTTPException(status_code=403, detail='You are not the owner or admin')
-        else:
-            return await analytic_crud.get_users_results(company_id=company_id)
+    if get_company.owner_id != user.id and not check_admin:
+        raise HTTPException(status_code=403, detail='You are not the owner or admin')
     return await analytic_crud.get_user_results(company_id=company_id)
 
 
@@ -48,11 +45,8 @@ async def get_user(user: schemas.UserBaseSchema = Depends(get_current_user), use
         raise HTTPException(status_code=400, detail='the user was not found or the user did not pass any quiz')
     if get_company.owner_id == user.id:
         return await analytic_crud.get_user_results(user_id=user_id, company_id=company_id)
-    if get_company.owner_id != user.id:
-        if not check_admin:
-            raise HTTPException(status_code=403, detail='You are not the owner or admin')
-        else:
-            return await analytic_crud.get_user_results(user_id=user_id, company_id=company_id)
+    if get_company.owner_id != user.id and not check_admin:
+        raise HTTPException(status_code=403, detail='You are not the owner or admin')
     return await analytic_crud.get_user_results(user_id=user_id, company_id=company_id)
 
 
@@ -67,11 +61,8 @@ async def last_time_pass(user: schemas.UserBaseSchema = Depends(get_current_user
     check_admin = await inv_crud.get_status_admin(company_id=company_id, user_id=user.id)
     if get_company.owner_id == user.id:
         return user_result.get_user_pass(get_users=get_users)
-    if get_company.owner_id != user.id:
-        if not check_admin:
-            raise HTTPException(status_code=403, detail='You are not the owner or admin')
-        else:
-            return user_result.get_user_pass(get_users=get_users)
+    if get_company.owner_id != user.id and not check_admin:
+        raise HTTPException(status_code=403, detail='You are not the owner or admin')
     return user_result.get_user_pass(get_users=get_users)
 
 
@@ -83,9 +74,8 @@ async def get_user_main_rating(user_id: int = Path(..., gt=0)) -> schemas.Rating
         raise HTTPException(status_code=404, detail='User not found')
     get_users = await analytic_crud.get_user_rating(user_id=user_id)
     res = user_result.get_user_pass(get_users=get_users)
-    for i in res:
-        if user_id == i['user_id']:
-            return {'rating': i['rating']}
+    if res:
+        return res[0]
     else:
         raise HTTPException(status_code=404, detail='The user does not have a rating yet')
 
