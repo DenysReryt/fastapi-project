@@ -19,13 +19,13 @@ router = APIRouter()
 
 # Quizzes
 ##Get all quizzes
-@router.get('/quizzes/', tags=['Quizzes'], response_model=List[schemas.ListQuizzes])
+@router.get('/quizzes/', response_model=List[schemas.ListQuizzes])
 async def get_all_quizzes(skip: int = 0, limit: int = 100) -> schemas.BaseQuiz:
     return await quiz_crud.get_quizzes(skip=skip, limit=limit)
 
 
 ##Create quiz
-@router.post('/quizzes/create/{company_id}', tags=['Quizzes'], response_model=schemas.BaseQuiz)
+@router.post('/create/{company_id}', response_model=schemas.BaseQuiz)
 async def create_quiz(quiz: schemas.CreateQuiz, company_id: int = Path(..., gt=0),
                       user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuiz:
     get_company = await company_crud.get_company_by_id(company_id)
@@ -41,7 +41,7 @@ async def create_quiz(quiz: schemas.CreateQuiz, company_id: int = Path(..., gt=0
 
 
 ##Create question
-@router.post('/quizzes/create_question/{quiz_id}', tags=['Quizzes'], response_model=schemas.BaseQuestion)
+@router.post('/create_question/{quiz_id}', response_model=schemas.BaseQuestion)
 async def create_question(question: schemas.CreateQuestion, answer: str, quiz_id: int = Path(..., gt=0),
                           user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuestion:
     quiz = await quiz_crud.check_quiz(quiz_id=quiz_id)
@@ -60,7 +60,7 @@ async def create_question(question: schemas.CreateQuestion, answer: str, quiz_id
 
 
 ##Update quiz
-@router.put('/quizzes/update_quiz/{quiz_id}', tags=['Quizzes'], response_model=schemas.BaseQuiz)
+@router.put('/update_quiz/{quiz_id}', response_model=schemas.BaseQuiz)
 async def update_quiz(quiz: schemas.CreateQuiz, quiz_id: int = Path(..., gt=0),
                       user: schemas.UserBaseSchema = Depends(get_current_user)) -> schemas.BaseQuiz:
     quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)
@@ -76,7 +76,7 @@ async def update_quiz(quiz: schemas.CreateQuiz, quiz_id: int = Path(..., gt=0),
 
 
 ##Delete Quiz
-@router.delete('/quizzes/delete_quiz/{quiz_id}', tags=['Quizzes'], status_code=200)
+@router.delete('/delete_quiz/{quiz_id}', status_code=200)
 async def delete_quiz(quiz_id: int = Path(..., gt=0),
                       user: schemas.UserBaseSchema = Depends(get_current_user)) -> HTTPException:
     quiz_get = await quiz_crud.check_quiz(quiz_id=quiz_id)

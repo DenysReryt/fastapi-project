@@ -10,6 +10,7 @@ from src.app.companies import routers as companies
 from src.app.invitations import routers as invitations
 from src.app.quizzes import routers as quizzes
 from src.app.result import routers as result
+from src.app.analytics import routers as analytics
 
 import uvicorn
 
@@ -34,6 +35,7 @@ app.include_router(companies.router, tags=['Companies'], prefix='/companies')
 app.include_router(invitations.router, tags=['Invitations'], prefix='/invitations')
 app.include_router(quizzes.router, tags=['Quizzes'], prefix='/quizzes')
 app.include_router(result.router, tags=['Take quiz'], prefix='/take_quiz')
+app.include_router(analytics.router, tags=['Analytics'], prefix='/analytics')
 
 
 @app.get('/')

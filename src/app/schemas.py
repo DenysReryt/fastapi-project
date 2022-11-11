@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 from pydantic import BaseModel, EmailStr, constr
 
 
@@ -172,5 +172,22 @@ class QuizResult(BaseModel):
 
 
 class Rating(BaseModel):
+    rating: float
+
+
+#Analytics
+class ListOfUserResults(BaseModel):
+    rating: float
+    quiz_id: int
+    time: datetime
+
+
+class ListOfUsersResults(BaseModel):
     user_id: int
     rating: float
+    time: datetime
+
+
+
+
+
