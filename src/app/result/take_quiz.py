@@ -8,7 +8,7 @@ from src.app.models import questions, answers, result_quiz, rating, users_of_com
 
 import datetime
 
-from src.app.schemas import BaseQuestion, AnswerInput
+from src.app.schemas import BaseQuestion, AnswerInput, BaseResult
 
 
 class ResultCrud():
@@ -56,7 +56,7 @@ class ResultCrud():
         query = questions.select().where(quiz_id == questions.c.quiz_id)
         return await database.fetch_all(query=query)
 
-    async def if_user_in_company(self, user_id: int, company_id: int):
+    async def if_user_in_company(self, user_id: int, company_id: int) -> BaseResult:
         query = users_of_company.select().where(user_id == users_of_company.c.user_id, company_id == users_of_company.c.company_id)
         return await database.fetch_one(query=query)
 
