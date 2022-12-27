@@ -39,7 +39,7 @@ app.include_router(analytics.router, tags=['Analytics'], prefix='/analytics')
 
 
 @app.get('/')
-def root():
+async def root():
     return {'status': 'Working'}
 
 
